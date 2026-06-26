@@ -59,20 +59,24 @@ name, and (b) a conflicting **company / trademark / brand** via public web searc
 Blends of Davidson identity — the **Wildcat** mascot and the college motto *Alenda **Lux**
 Ubi Orta Libertas* — with wireless/analysis themes. (Signing under the Davidson team cert.)
 
+Lesson from vetting: short real/Latin words are almost all claimed by *some* app or
+company — the clearable, non-cheesy options are **clean wildcat-family names** or
+**coined** words. (Avoid unfortunate substrings — e.g. "Margay" was dropped for that
+reason despite being clear.)
+
 | Name | App Store | Trademark / web | Verdict |
 |---|---|---|---|
-| **Luxscope** | no app | no company/TM found ("lux-" family is busy, but this mark is open) | ✅ **Top Davidson pick** — motto "Lux" + scope = analyzer |
-| **Catwave** | no app | none found | ✅ Clear — clean Wildcat tie |
-| **Wildwave** | no app | "Wild Waves" waterpark only (different field) | ✅ Clear-ish — Wildcat tie |
-| Catbeam | no app | "CAT Beam Tech" (CNT X-ray systems) | ⚠️ company exists, different field |
-| Luxsight | no app | registered **LUXSIGHT COLLECTION** mark (lighting goods) | ⚠️ live mark, different class |
-| Luxband | no app | "Lux Bands" (Apple Watch bands) | ⚠️ |
-| Luxsignal | no app | active **LuxSignals** trading-software brand | ❌ |
-| Luxwave | no app | crowded — Luxwave / Luxewave / LUX WAVE LTD, many | ❌ |
-| Catscope | **taken** (Catscope: Daily Mood) | — | ❌ |
-| Catsense | **taken** (CatSense AI) | — | ❌ |
-| Whisker | **taken** (Whisker — Litter-Robot Wi-Fi brand) | — | ❌ |
-| Prowl | **taken** (Prowl: Easy Push Notifications) | — | ❌ |
+| **Manul** | no app (cameo in a cat game) | none found | ✅ **Top pick** — Pallas's cat (a real wildcat); short, clear, alert-eyed "watcher" |
+| **Felidae** | no app | none found (taxonomic term) | ✅ Clear — elegant "the cat family"; tasteful Wildcat nod |
+| **Oncilla** | no app | none found | ✅ Clear — but obscure / harder to spell |
+| Lynxa | "Lynxapp" dev only | near the busy "Lynx" family | ⚠️ coined (lynx + "links"); Lynx-adjacent |
+| Luxscope / Catwave / Wildwave | no app | mixed | ⚠️ workable but Lux-saturated / cutesy |
+| Margay | no app | none found | 🚫 clear, but rejected (substring) |
+| Ocelot | apps (games) | **.NET Ocelot** API gateway (software) | ❌ |
+| Caelo / Felux | no app | Caelo Software / FELUX INC. | ❌ |
+| Lux* family (Luxon/Luxa/Luxwave/Luxsignal) | mixed | saturated lighting/optoelectronics + trading brands | ❌ |
+| Orta / Caracal / Pallas / Tenebra | **taken** | also companies | ❌ |
+| Catscope / Catsense / Whisker / Prowl | **taken** | Whisker = Wi-Fi pet-device brand | ❌ |
 
 ## Selected sources
 
