@@ -56,33 +56,51 @@ struct NetworksView: View {
     // MARK: - Filter bar
 
     private var filterBar: some View {
-        HStack(spacing: 12) {
-            TextField("Search SSID, BSSID, vendor", text: $search)
-                .textFieldStyle(.roundedBorder).frame(maxWidth: 260)
-
-            Picker("Band", selection: $bandFilter) {
-                Text("All bands").tag(Band?.none)
-                ForEach([Band.ghz2_4, .ghz5, .ghz6], id: \.self) { Text($0.rawValue).tag(Band?.some($0)) }
-            }.fixedSize()
-
-            Picker("Generation", selection: $genFilter) {
-                Text("All").tag(PHYGeneration?.none)
-                ForEach([PHYGeneration.be, .ax, .ac, .n], id: \.self) {
-                    Text($0.standardLabel).tag(PHYGeneration?.some($0))
-                }
-            }.fixedSize()
-
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Min RSSI: \(Int(minRSSI)) dBm").font(.caption2).foregroundStyle(.secondary)
-                Slider(value: $minRSSI, in: -100...(-30)).frame(width: 130)
+        // Lay out on one row when there's room; wrap to two rows when narrow.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                searchField.frame(minWidth: 160, maxWidth: 260)
+                controls
+                Spacer()
+                countLabel
             }
-
-            Toggle("Group by SSID", isOn: $groupBySSID).toggleStyle(.checkbox)
-            Spacer()
-            Text("\(filtered.count) of \(model.networks.count)")
-                .font(.caption).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack { searchField.frame(maxWidth: 320); Spacer(); countLabel }
+                HStack(spacing: 12) { controls; Spacer() }
+            }
         }
         .padding(10)
+    }
+
+    private var searchField: some View {
+        TextField("Search SSID, BSSID, vendor", text: $search)
+            .textFieldStyle(.roundedBorder)
+    }
+
+    @ViewBuilder private var controls: some View {
+        Picker("Band", selection: $bandFilter) {
+            Text("All bands").tag(Band?.none)
+            ForEach([Band.ghz2_4, .ghz5, .ghz6], id: \.self) { Text($0.rawValue).tag(Band?.some($0)) }
+        }.fixedSize()
+
+        Picker("Generation", selection: $genFilter) {
+            Text("All").tag(PHYGeneration?.none)
+            ForEach([PHYGeneration.be, .ax, .ac, .n], id: \.self) {
+                Text($0.standardLabel).tag(PHYGeneration?.some($0))
+            }
+        }.fixedSize()
+
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Min RSSI: \(Int(minRSSI)) dBm").font(.caption2).foregroundStyle(.secondary)
+            Slider(value: $minRSSI, in: -100...(-30)).frame(width: 130)
+        }
+
+        Toggle("Group by SSID", isOn: $groupBySSID).toggleStyle(.checkbox)
+    }
+
+    private var countLabel: some View {
+        Text("\(filtered.count) of \(model.networks.count)")
+            .font(.caption).foregroundStyle(.secondary)
     }
 
     // MARK: - Table

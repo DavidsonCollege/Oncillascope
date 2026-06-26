@@ -8,6 +8,10 @@ struct AirScopeApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(model)
+                // Set ideal size only (no minimum — a min frame collapses the split
+                // view). This makes the window open at ~1100x720 instead of adopting
+                // the content's runaway ideal height, while staying freely resizable.
+                .frame(idealWidth: 1100, idealHeight: 720)
                 .onAppear { model.start() }
                 .onDisappear { model.stop() }
         }

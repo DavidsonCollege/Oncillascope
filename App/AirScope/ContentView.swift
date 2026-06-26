@@ -56,6 +56,12 @@ struct ContentView: View {
                     }
                 }
             }
+            // Cap the detail's *ideal* size (otherwise the scrolling panels' tall
+            // content ideal drives the window to thousands of points high), while
+            // keeping max: .infinity so it stays freely resizable. A frame here on the
+            // detail is safe — only framing the NavigationSplitView root collapses it.
+            .frame(minWidth: 480, idealWidth: 860, maxWidth: .infinity,
+                   minHeight: 380, idealHeight: 700, maxHeight: .infinity)
             .toolbar { Toolbar() }
             .navigationTitle((selection ?? .dashboard).rawValue)
         }
