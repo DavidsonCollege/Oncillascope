@@ -7,11 +7,19 @@ import WiFiModel
 struct ChannelMapView: View {
     @EnvironmentObject var model: AppModel
     @State private var band: Band = .ghz2_4
+    @State private var hovered: BSSObservation?
+    @State private var hoverPoint: CGPoint = .zero
 
     private let floorDBm = -100
 
     private var networksInBand: [BSSObservation] {
         model.networks.filter { $0.channel.band == band && $0.channel.primaryCenterMHz != nil }
+    }
+
+    /// Whether this Mac's radio supports the selected band. Unknown (empty set, e.g.
+    /// Wi-Fi off) is treated as supported to avoid a false "unsupported" claim.
+    private var bandSupported: Bool {
+        model.supportedBands.isEmpty || model.supportedBands.contains(band)
     }
 
     var body: some View {
@@ -26,10 +34,20 @@ struct ChannelMapView: View {
                     Text("\(networksInBand.count) BSS in band").font(.caption).foregroundStyle(.secondary)
                 }
 
-                if networksInBand.isEmpty {
-                    ContentUnavailableView("No networks in \(band.rawValue)",
-                                           systemImage: "chart.bar.xaxis")
-                        .frame(maxWidth: .infinity, minHeight: 360)
+                if !bandSupported {
+                    ContentUnavailableView {
+                        Label("\(band.rawValue) not supported", systemImage: "antenna.radiowaves.left.and.right.slash")
+                    } description: {
+                        Text("This Mac's Wi-Fi radio does not support the \(band.rawValue) band, so no \(band.rawValue) networks can be detected.")
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 360)
+                } else if networksInBand.isEmpty {
+                    ContentUnavailableView {
+                        Label("No networks in \(band.rawValue)", systemImage: "chart.bar.xaxis")
+                    } description: {
+                        Text("No \(band.rawValue) networks were found in the most recent scan.")
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 360)
                 } else {
                     recommendation
                     spectrumChart
@@ -50,7 +68,9 @@ struct ChannelMapView: View {
                              series: .value("BSS", net.id))
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(color(for: net))
-                    .opacity(0.85)
+                    // Highlight the hovered curve; dim the rest.
+                    .opacity(hovered == nil ? 0.85 : (hovered?.id == net.id ? 1.0 : 0.18))
+                    .lineStyle(StrokeStyle(lineWidth: hovered?.id == net.id ? 3 : 1.6))
                 }
             }
         }
@@ -58,9 +78,70 @@ struct ChannelMapView: View {
         .chartXScale(domain: bandFrequencyRange)
         .chartXAxisLabel("Frequency (MHz)")
         .chartYAxisLabel("RSSI (dBm)")
+        .chartOverlay { proxy in
+            GeometryReader { geo in
+                Rectangle().fill(.clear).contentShape(Rectangle())
+                    .onContinuousHover { phase in
+                        switch phase {
+                        case .active(let loc):
+                            guard let anchor = proxy.plotFrame else { return }
+                            let plot = geo[anchor]
+                            let fx: Int? = proxy.value(atX: loc.x - plot.minX)
+                            let fy: Int? = proxy.value(atY: loc.y - plot.minY)
+                            if let f = fx, let y = fy {
+                                hovered = networkNear(freqMHz: f, dbm: y)
+                                hoverPoint = loc
+                            }
+                        case .ended:
+                            hovered = nil
+                        }
+                    }
+                if let h = hovered {
+                    tooltip(h)
+                        .fixedSize()
+                        .position(x: min(max(hoverPoint.x, 90), geo.size.width - 90),
+                                  y: max(hoverPoint.y - 46, 30))
+                        .allowsHitTesting(false)
+                }
+            }
+        }
         .frame(height: 420)
         .padding(8)
         .background(.quaternary.opacity(0.2), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    /// Tooltip shown when hovering a curve: SSID + BSSID + channel + RSSI.
+    private func tooltip(_ net: BSSObservation) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(net.ssid?.isEmpty == false ? net.ssid! : "<hidden>")
+                .font(.caption).bold()
+            Text(net.bssid ?? "<redacted>")
+                .font(.system(.caption2, design: .monospaced)).foregroundStyle(.secondary)
+            Text("ch \(net.channel.label) · \(net.rssi) dBm")
+                .font(.caption2).foregroundStyle(.secondary)
+        }
+        .padding(7)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 7))
+        .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(color(for: net).opacity(0.6)))
+        .shadow(radius: 3)
+    }
+
+    /// The network whose curve passes nearest the hovered (frequency, RSSI) point.
+    private func networkNear(freqMHz: Int, dbm: Int) -> BSSObservation? {
+        var best: (net: BSSObservation, dist: Double)?
+        for net in networksInBand {
+            guard let span = net.channel.frequencySpanMHz,
+                  let center = net.channel.primaryCenterMHz,
+                  freqMHz >= span.low, freqMHz <= span.high else { continue }
+            // Linear-interpolate the triangular curve's height at this frequency.
+            let t: Double = freqMHz <= center
+                ? Double(freqMHz - span.low) / Double(max(1, center - span.low))
+                : Double(span.high - freqMHz) / Double(max(1, span.high - center))
+            let curveY = Double(floorDBm) + t * Double(net.rssi - floorDBm)
+            let dist = abs(curveY - Double(dbm))
+            if best == nil || dist < best!.dist { best = (net, dist) }
+        }
+        return best?.net
     }
 
     /// X-axis frequency span for the selected band (MHz). Without this, Swift Charts

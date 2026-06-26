@@ -33,6 +33,13 @@ public struct ConnectionInfo: Codable, Sendable, Hashable {
         return min(1.0, txRate / maxRate)
     }
 
+    /// `transmitPower` is milliwatts (per CoreWLAN). Convert to dBm for a readable
+    /// figure: dBm = 10·log10(mW). Returns nil for non-positive/absent values.
+    public var transmitPowerDBm: Int? {
+        guard let mw = transmitPower, mw > 0 else { return nil }
+        return Int((10 * log10(Double(mw))).rounded())
+    }
+
     public init(
         ssid: String? = nil,
         bssid: String? = nil,

@@ -47,6 +47,15 @@ public struct WiFiInterface: Sendable {
         return set.map { CWMappers.channel($0) }.sorted { $0.number < $1.number }
     }
 
+    /// Radio bands this Mac's Wi-Fi hardware supports, derived from the supported
+    /// channel set. Empty when the interface is unavailable (treat as "unknown",
+    /// not "unsupported"). Lets the UI distinguish "no 6 GHz networks" from "this
+    /// Mac has no 6 GHz radio".
+    public func supportedBands() -> Set<Band> {
+        guard let set = interface?.supportedWLANChannels() else { return [] }
+        return Set(set.map { CWMappers.band($0.channelBand) }).subtracting([.unknown])
+    }
+
     // MARK: - Scan
 
     public enum ScanError: Error, Sendable { case noInterface; case failed(String) }

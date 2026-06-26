@@ -36,6 +36,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var scanError: String?
     @Published private(set) var wdutil: WdutilState = .unknown
     @Published private(set) var interfaceAvailable = true
+    /// Bands this Mac's radio supports (empty = unknown, e.g. Wi-Fi off).
+    @Published private(set) var supportedBands: Set<Band> = []
 
     // User controls.
     @Published var refreshInterval: Double = 2.0
@@ -78,6 +80,8 @@ final class AppModel: ObservableObject {
 
     func start() {
         interfaceAvailable = WiFiInterface.isAvailable
+        let iface = self.iface
+        Task { self.supportedBands = await Task.detached { iface.supportedBands() }.value }
         if location.access == .notDetermined { location.request() }
         // Don't auto-prompt for admin on launch — show the banner and let the user
         // click Authorize, which presents the password dialog once.

@@ -69,7 +69,8 @@ struct DashboardView: View {
             MetricTile(title: "Tx Rate", value: String(format: "%.0f Mbps", c.txRate))
             efficiencyTile(c)
             if let tp = c.transmitPower {
-                MetricTile(title: "Tx Power", value: "\(tp)")
+                MetricTile(title: "Tx Power", value: "\(tp) mW",
+                           subtitle: c.transmitPowerDBm.map { "≈ \($0) dBm" })
             }
         }
     }
