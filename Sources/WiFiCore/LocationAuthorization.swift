@@ -33,11 +33,18 @@ public final class LocationAuthorization: NSObject, ObservableObject, CLLocation
         manager.requestAlwaysAuthorization()
     }
 
-    /// Open System Settings to the app's Location pane (used when already denied).
+    /// Open System Settings to the Location Services pane (used when already denied).
+    /// URL schemes differ across macOS versions, so try the modern form first and fall
+    /// back to the legacy pane, then to System Settings generally.
     public func openSettings() {
         #if canImport(AppKit)
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices") {
-            import_openURL(url)
+        let candidates = [
+            "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_LocationServices",
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices",
+            "x-apple.systempreferences:com.apple.preference.security",
+        ]
+        for s in candidates {
+            if let url = URL(string: s), import_openURL(url) { return }
         }
         #endif
     }
@@ -59,7 +66,8 @@ public final class LocationAuthorization: NSObject, ObservableObject, CLLocation
 
 #if canImport(AppKit)
 import AppKit
-@MainActor private func import_openURL(_ url: URL) {
+@discardableResult
+@MainActor private func import_openURL(_ url: URL) -> Bool {
     NSWorkspace.shared.open(url)
 }
 #endif

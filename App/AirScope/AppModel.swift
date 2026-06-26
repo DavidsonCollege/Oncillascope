@@ -51,7 +51,7 @@ final class AppModel: ObservableObject {
 
     private let telemetry = TelemetryStore(capacity: 3600)
     private let iface = WiFiInterface()
-    private let runner = WdutilRunner(strategy: .directSudo)
+    private let runner = WdutilRunner(strategy: .osascriptAdmin)
 
     private var refreshTask: Task<Void, Never>?
     private var lastScanTick = Date.distantPast
@@ -79,7 +79,9 @@ final class AppModel: ObservableObject {
     func start() {
         interfaceAvailable = WiFiInterface.isAvailable
         if location.access == .notDetermined { location.request() }
-        Task { await refreshWdutil() }
+        // Don't auto-prompt for admin on launch — show the banner and let the user
+        // click Authorize, which presents the password dialog once.
+        wdutil = .needsAuth
         scanNow()
         startLoop()
     }
@@ -212,6 +214,8 @@ final class AppModel: ObservableObject {
                 let m = try await runner.fetchMetrics()
                 return .ready(m)
             } catch WdutilRunner.WdutilError.notAuthorized {
+                return .needsAuth
+            } catch WdutilRunner.WdutilError.userCancelled {
                 return .needsAuth
             } catch WdutilRunner.WdutilError.executableMissing {
                 return .unavailable("wdutil not found on this system.")
