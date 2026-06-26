@@ -53,7 +53,8 @@ final class AppModel: ObservableObject {
 
     private let telemetry = TelemetryStore(capacity: 3600)
     private let iface = WiFiInterface()
-    private let runner = WdutilRunner(strategy: .osascriptAdmin)
+    // In-process AppleScript so the admin prompt is attributed to AirScope, not osascript.
+    private let runner = WdutilRunner(strategy: .helper(invoke: runWdutilInfoWithAdminPrompt))
 
     private var refreshTask: Task<Void, Never>?
     private var lastScanTick = Date.distantPast
