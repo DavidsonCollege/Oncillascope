@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+      AirScope ships non-sandboxed (Developer-ID side-load, spec §5): the App Sandbox
+      complicates spawning `wdutil` / a privileged helper. CoreWLAN and Location work
+      without a sandbox. Outgoing network is enabled only for the optional OUI update.
+
+      If you later adopt the App Sandbox, add:
+        com.apple.security.app-sandbox            = true
+        com.apple.security.network.client         = true
+        com.apple.security.personal-information.location = true
+      and move wdutil to an SMAppService privileged helper.
+    -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+</dict>
+</plist>

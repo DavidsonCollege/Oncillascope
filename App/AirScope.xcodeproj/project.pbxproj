@@ -1,0 +1,314 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EA0000000000000000000021 /* WiFiCore in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000011 /* WiFiCore */; };
+		EA0000000000000000000022 /* WiFiModel in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000012 /* WiFiModel */; };
+		EA0000000000000000000023 /* IEParser in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000013 /* IEParser */; };
+		EA0000000000000000000024 /* WdutilBridge in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000014 /* WdutilBridge */; };
+		EA0000000000000000000025 /* OUIResolver in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000015 /* OUIResolver */; };
+		EA0000000000000000000026 /* Telemetry in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000016 /* Telemetry */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		EA0000000000000000000006 /* AirScope.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirScope.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA0000000000000000000031 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EA0000000000000000000032 /* AirScope.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AirScope.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		EA0000000000000000000004 /* AirScope */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AirScope;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EA0000000000000000000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA0000000000000000000021 /* WiFiCore in Frameworks */,
+				EA0000000000000000000022 /* WiFiModel in Frameworks */,
+				EA0000000000000000000023 /* IEParser in Frameworks */,
+				EA0000000000000000000024 /* WdutilBridge in Frameworks */,
+				EA0000000000000000000025 /* OUIResolver in Frameworks */,
+				EA0000000000000000000026 /* Telemetry in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EA0000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				EA0000000000000000000004 /* AirScope */,
+				EA0000000000000000000031 /* Info.plist */,
+				EA0000000000000000000032 /* AirScope.entitlements */,
+				EA0000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EA0000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EA0000000000000000000006 /* AirScope.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EA0000000000000000000005 /* AirScope */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EA000000000000000000000B /* Build configuration list for PBXNativeTarget "AirScope" */;
+			buildPhases = (
+				EA0000000000000000000007 /* Sources */,
+				EA0000000000000000000008 /* Frameworks */,
+				EA0000000000000000000009 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EA0000000000000000000004 /* AirScope */,
+			);
+			name = AirScope;
+			packageProductDependencies = (
+				EA0000000000000000000011 /* WiFiCore */,
+				EA0000000000000000000012 /* WiFiModel */,
+				EA0000000000000000000013 /* IEParser */,
+				EA0000000000000000000014 /* WdutilBridge */,
+				EA0000000000000000000015 /* OUIResolver */,
+				EA0000000000000000000016 /* Telemetry */,
+			);
+			productName = AirScope;
+			productReference = EA0000000000000000000006 /* AirScope.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EA0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					EA0000000000000000000005 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+				};
+			};
+			buildConfigurationList = EA000000000000000000000A /* Build configuration list for PBXProject "AirScope" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EA0000000000000000000002;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = EA0000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EA0000000000000000000005 /* AirScope */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EA0000000000000000000009 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EA0000000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		EA000000000000000000000C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EA000000000000000000000D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		EA000000000000000000000E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AirScope.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.davidson.airscope;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		EA000000000000000000000F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AirScope.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.davidson.airscope;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EA000000000000000000000A /* Build configuration list for PBXProject "AirScope" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA000000000000000000000C /* Debug */,
+				EA000000000000000000000D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EA000000000000000000000B /* Build configuration list for PBXNativeTarget "AirScope" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA000000000000000000000E /* Debug */,
+				EA000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EA0000000000000000000011 /* WiFiCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */;
+			productName = WiFiCore;
+		};
+		EA0000000000000000000012 /* WiFiModel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */;
+			productName = WiFiModel;
+		};
+		EA0000000000000000000013 /* IEParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */;
+			productName = IEParser;
+		};
+		EA0000000000000000000014 /* WdutilBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */;
+			productName = WdutilBridge;
+		};
+		EA0000000000000000000015 /* OUIResolver */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */;
+			productName = OUIResolver;
+		};
+		EA0000000000000000000016 /* Telemetry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */;
+			productName = Telemetry;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = EA0000000000000000000001 /* Project object */;
+}
