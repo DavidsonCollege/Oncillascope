@@ -40,11 +40,26 @@ Privacy & Security → Location Services → AirScope). BSSIDs are now real.
 
 ## 2. Developer ID build for distribution
 
+**Team ID:** `4Z539UE4TT` (Davidson College developer account).
+
+**Prerequisite — install the cert (one-time):** a "Developer ID Application"
+certificate + private key must be in the login keychain. As of last check there were
+**none** (`security find-identity -v -p codesigning` → "0 valid identities found").
+Create it via Xcode ▸ Settings ▸ Accounts ▸ (select team) ▸ Manage Certificates ▸ **+**
+▸ **Developer ID Application** (only the team's Account Holder can create it). Then verify:
+
+```bash
+security find-identity -v -p codesigning
+# expect: …  "Developer ID Application: <name> (4Z539UE4TT)"
+```
+
+Once the cert is present, build a signed Release:
+
 ```bash
 xcodebuild -scheme AirScope -configuration Release \
   CODE_SIGN_STYLE=Manual \
-  CODE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
-  DEVELOPMENT_TEAM=TEAMID \
+  CODE_SIGN_IDENTITY="Developer ID Application" \
+  DEVELOPMENT_TEAM=4Z539UE4TT \
   -derivedDataPath build \
   build
 ```
