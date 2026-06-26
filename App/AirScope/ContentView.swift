@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum Section: String, CaseIterable, Identifiable {
+enum Panel: String, CaseIterable, Identifiable, Hashable {
     case dashboard = "Dashboard"
     case networks = "Nearby Networks"
     case channels = "Channel Map"
@@ -18,12 +18,14 @@ enum Section: String, CaseIterable, Identifiable {
 
 struct ContentView: View {
     @EnvironmentObject var model: AppModel
-    @State private var selection: Section = .dashboard
+    @State private var selection: Panel? = .dashboard
 
     var body: some View {
         NavigationSplitView {
-            List(Section.allCases, selection: $selection) { section in
-                Label(section.rawValue, systemImage: section.icon).tag(section)
+            List(selection: $selection) {
+                ForEach(Panel.allCases) { panel in
+                    Label(panel.rawValue, systemImage: panel.icon).tag(panel)
+                }
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 220)
             .safeAreaInset(edge: .bottom) { SidebarStatus() }
@@ -31,7 +33,7 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 DegradedModeBanner()
                 Group {
-                    switch selection {
+                    switch selection ?? .dashboard {
                     case .dashboard: DashboardView()
                     case .networks: NetworksView()
                     case .channels: ChannelMapView()
@@ -40,7 +42,7 @@ struct ContentView: View {
                 }
             }
             .toolbar { Toolbar() }
-            .navigationTitle(selection.rawValue)
+            .navigationTitle((selection ?? .dashboard).rawValue)
         }
     }
 }
