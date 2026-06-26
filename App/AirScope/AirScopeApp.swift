@@ -1,5 +1,16 @@
 import SwiftUI
 
+/// View-menu toggle (⇧⌘E) switching dashboard tooltips between the technical and
+/// plain-English explanations. Backed by @AppStorage so the choice persists and every
+/// tooltip updates live.
+private struct PlainEnglishTooltipsToggle: View {
+    @AppStorage(plainEnglishTooltipsKey) private var plainEnglish = false
+    var body: some View {
+        Toggle("Plain-English Tooltips", isOn: $plainEnglish)
+            .keyboardShortcut("e", modifiers: [.command, .shift])
+    }
+}
+
 @main
 struct AirScopeApp: App {
     @StateObject private var model = AppModel()
@@ -17,6 +28,10 @@ struct AirScopeApp: App {
         }
         .defaultSize(width: 1100, height: 720)
         .commands {
+            CommandGroup(after: .sidebar) {
+                PlainEnglishTooltipsToggle()
+                Divider()
+            }
             CommandGroup(after: .newItem) {
                 Button("Scan Now") { model.scanNow() }
                     .keyboardShortcut("r", modifiers: .command)

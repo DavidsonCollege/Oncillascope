@@ -3,6 +3,7 @@ import WiFiModel
 
 struct DashboardView: View {
     @EnvironmentObject var model: AppModel
+    @AppStorage(plainEnglishTooltipsKey) private var plainEnglish = false
 
     var body: some View {
         ScrollView {
@@ -62,15 +63,17 @@ struct DashboardView: View {
 
     @ViewBuilder private func signalTiles(_ c: ConnectionInfo) -> some View {
         LazyVGrid(columns: grid, spacing: 12) {
-            MetricTile(title: "Signal (RSSI)", value: "\(c.rssi) dBm", color: Quality.rssiColor(c.rssi))
-            MetricTile(title: "Noise", value: "\(c.noise) dBm")
+            MetricTile(title: "Signal (RSSI)", value: "\(c.rssi) dBm", color: Quality.rssiColor(c.rssi),
+                       help: Help.rssi.resolved(plain: plainEnglish))
+            MetricTile(title: "Noise", value: "\(c.noise) dBm", help: Help.noise.resolved(plain: plainEnglish))
             MetricTile(title: "SNR", value: "\(c.snr) dB",
-                       subtitle: Quality.snrLabel(c.snr), color: Quality.snrColor(c.snr))
-            MetricTile(title: "Tx Rate", value: String(format: "%.0f Mbps", c.txRate))
+                       subtitle: Quality.snrLabel(c.snr), color: Quality.snrColor(c.snr),
+                       help: Help.snr.resolved(plain: plainEnglish))
+            MetricTile(title: "Tx Rate", value: String(format: "%.0f Mbps", c.txRate), help: Help.txRate.resolved(plain: plainEnglish))
             efficiencyTile(c)
             if let tp = c.transmitPower {
                 MetricTile(title: "Tx Power", value: "\(tp) mW",
-                           subtitle: c.transmitPowerDBm.map { "≈ \($0) dBm" })
+                           subtitle: c.transmitPowerDBm.map { "≈ \($0) dBm" }, help: Help.txPower.resolved(plain: plainEnglish))
             }
         }
     }
@@ -82,11 +85,12 @@ struct DashboardView: View {
                 title: "Max PHY Rate",
                 value: String(format: "%.0f Mbps", maxRate),
                 subtitle: String(format: "%.0f%% efficiency", eff * 100),
-                color: eff > 0.6 ? .green : (eff > 0.3 ? .yellow : .red)
+                color: eff > 0.6 ? .green : (eff > 0.3 ? .yellow : .red),
+                help: Help.maxRate.resolved(plain: plainEnglish)
             )
         } else {
             MetricTile(title: "Max PHY Rate", value: "—",
-                       subtitle: model.phyMetricsAvailable ? nil : "needs wdutil")
+                       subtitle: model.phyMetricsAvailable ? nil : "needs admin", help: Help.maxRate.resolved(plain: plainEnglish))
         }
     }
 
@@ -94,18 +98,21 @@ struct DashboardView: View {
 
     @ViewBuilder private func phyTiles(_ c: ConnectionInfo) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("PHY Layer (wdutil)").font(.headline)
+            Text("PHY Layer").font(.headline)
             if model.phyMetricsAvailable {
                 LazyVGrid(columns: grid, spacing: 12) {
-                    MetricTile(title: "MCS Index", value: c.mcsIndex.map(String.init) ?? "—")
-                    MetricTile(title: "Spatial Streams (NSS)", value: c.nss.map(String.init) ?? "—")
+                    MetricTile(title: "MCS Index", value: c.mcsIndex.map(String.init) ?? "—",
+                               help: Help.mcs.resolved(plain: plainEnglish))
+                    MetricTile(title: "Spatial Streams (NSS)", value: c.nss.map(String.init) ?? "—",
+                               help: Help.nss.resolved(plain: plainEnglish))
                     MetricTile(title: "Guard Interval",
-                               value: c.guardInterval.map { "\($0) ns" } ?? "—")
+                               value: c.guardInterval.map { "\($0) ns" } ?? "—", help: Help.guardInterval.resolved(plain: plainEnglish))
                     MetricTile(title: "CCA (busy)", value: c.cca.map { "\($0)%" } ?? "—",
-                               color: c.cca.map { Quality.utilizationColor(Double($0)) } ?? .primary)
+                               color: c.cca.map { Quality.utilizationColor(Double($0)) } ?? .primary,
+                               help: Help.cca.resolved(plain: plainEnglish))
                 }
             } else {
-                Text("MCS / NSS / guard interval / CCA require admin authorization for `wdutil`. Use the banner above to enable them.")
+                Text("MCS / NSS / guard interval / CCA require a one-time administrator authorization. Use the banner above to enable them.")
                     .font(.callout).foregroundStyle(.secondary)
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)

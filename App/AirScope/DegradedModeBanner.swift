@@ -27,7 +27,7 @@ struct DegradedModeBanner: View {
                     icon: "lock.fill",
                     tint: .blue,
                     title: "PHY metrics need admin authorization",
-                    message: "MCS index, spatial streams (NSS), guard interval, and CCA come from `wdutil`, which requires admin rights. Authorize once to enable them.",
+                    message: "MCS index, spatial streams (NSS), guard interval, and CCA require a one-time administrator authorization. Authorize once to enable them.",
                     actionTitle: "Authorize",
                     action: { Task { await model.refreshWdutil() } }
                 )

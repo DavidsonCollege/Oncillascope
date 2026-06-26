@@ -223,7 +223,7 @@ final class AppModel: ObservableObject {
             } catch WdutilRunner.WdutilError.userCancelled {
                 return .needsAuth
             } catch WdutilRunner.WdutilError.executableMissing {
-                return .unavailable("wdutil not found on this system.")
+                return .unavailable("The system tool required for PHY metrics was not found.")
             } catch {
                 return .unavailable(error.localizedDescription)
             }
