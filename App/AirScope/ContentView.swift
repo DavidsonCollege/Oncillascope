@@ -18,7 +18,21 @@ enum Panel: String, CaseIterable, Identifiable, Hashable {
 
 struct ContentView: View {
     @EnvironmentObject var model: AppModel
-    @State private var selection: Panel? = .dashboard
+    @State private var selection: Panel?
+
+    init() {
+        // Allow the initial panel to be chosen via env var (testing / screenshots):
+        // AIRSCOPE_PANEL = dashboard | networks | channels | logs
+        let env = ProcessInfo.processInfo.environment["AIRSCOPE_PANEL"]?.lowercased()
+        let initial: Panel
+        switch env {
+        case "networks": initial = .networks
+        case "channels": initial = .channels
+        case "logs": initial = .logs
+        default: initial = .dashboard
+        }
+        _selection = State(initialValue: initial)
+    }
 
     var body: some View {
         NavigationSplitView {
