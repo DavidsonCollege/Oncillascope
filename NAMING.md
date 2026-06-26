@@ -54,6 +54,26 @@ name, and (b) a conflicting **company / trademark / brand** via public web searc
 
 ---
 
+## 🐾 Davidson-themed candidates (Wildcat / "Lux" motto)
+
+Blends of Davidson identity — the **Wildcat** mascot and the college motto *Alenda **Lux**
+Ubi Orta Libertas* — with wireless/analysis themes. (Signing under the Davidson team cert.)
+
+| Name | App Store | Trademark / web | Verdict |
+|---|---|---|---|
+| **Luxscope** | no app | no company/TM found ("lux-" family is busy, but this mark is open) | ✅ **Top Davidson pick** — motto "Lux" + scope = analyzer |
+| **Catwave** | no app | none found | ✅ Clear — clean Wildcat tie |
+| **Wildwave** | no app | "Wild Waves" waterpark only (different field) | ✅ Clear-ish — Wildcat tie |
+| Catbeam | no app | "CAT Beam Tech" (CNT X-ray systems) | ⚠️ company exists, different field |
+| Luxsight | no app | registered **LUXSIGHT COLLECTION** mark (lighting goods) | ⚠️ live mark, different class |
+| Luxband | no app | "Lux Bands" (Apple Watch bands) | ⚠️ |
+| Luxsignal | no app | active **LuxSignals** trading-software brand | ❌ |
+| Luxwave | no app | crowded — Luxwave / Luxewave / LUX WAVE LTD, many | ❌ |
+| Catscope | **taken** (Catscope: Daily Mood) | — | ❌ |
+| Catsense | **taken** (CatSense AI) | — | ❌ |
+| Whisker | **taken** (Whisker — Litter-Robot Wi-Fi brand) | — | ❌ |
+| Prowl | **taken** (Prowl: Easy Push Notifications) | — | ❌ |
+
 ## Selected sources
 
 - App Store: [AirScope](https://apps.apple.com/us/app/airscope/id1499088839), [AirLens](https://apps.apple.com/es/app/airlens/id6743875293), [WaveMark](https://apps.apple.com/us/app/wavemark/id527955303), [WaveCAST](https://apps.apple.com/us/app/wavecast-audio-receiver/id1458383632), [GX WiFiScope](https://apps.apple.com/us/app/gx-wifiscope/id1621428062)
