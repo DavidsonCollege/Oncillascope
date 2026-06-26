@@ -1,0 +1,23 @@
+# Swift / SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcscmblueprint
+*.xccheckout
+build/
+
+# macOS
+.DS_Store
+
+# App output / logs
+*.app.dSYM
+/dist/
+*.log
+
+# Scratch
+/tmp/

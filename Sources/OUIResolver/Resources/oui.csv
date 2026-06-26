@@ -1,0 +1,47 @@
+# OUI -> vendor (24-bit MAC prefix). Format: HEX6,Vendor
+# Curated common subset. Replace with the full IEEE registry for complete coverage:
+#   curl -L https://standards-oui.ieee.org/oui/oui.csv  (then reformat to HEX6,Vendor)
+001451,Apple
+0017F2,Apple
+3C0754,Apple
+F0989D,Apple
+AC87A3,Apple
+A4D1D2,Apple
+F0B479,Apple
+7CD1C3,Apple
+00000C,Cisco
+001120,Cisco
+0024F7,Cisco
+00180A,Cisco Meraki
+E0CB4E,Cisco Meraki
+881544,Cisco Meraki
+0418D6,Ubiquiti
+24A43C,Ubiquiti
+788A20,Ubiquiti
+FCECDA,Ubiquiti
+687251,Ubiquiti
+00146C,Netgear
+2C3033,Netgear
+A040A0,Netgear
+50C7BF,TP-Link
+60E327,TP-Link
+EC086B,TP-Link
+000B86,Aruba (HPE)
+6CF37F,Aruba (HPE)
+945FD2,Aruba (HPE)
+0C9D92,Ruckus
+2C5D93,Ruckus
+3C5AB4,Google
+6466B3,Google Nest
+F4F5D8,Google
+44650D,Amazon
+F0272D,Amazon
+FCA183,Amazon
+002567,Samsung
+5440AD,Samsung
+001500,Intel
+3CA9F4,Intel
+7CB27D,Intel
+000C42,Routerboard (MikroTik)
+4C5E0C,MikroTik
+DC2C6E,MikroTik
