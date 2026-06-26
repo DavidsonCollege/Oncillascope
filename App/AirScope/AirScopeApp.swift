@@ -8,11 +8,10 @@ struct AirScopeApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(model)
-                .frame(minWidth: 980, minHeight: 640)
                 .onAppear { model.start() }
                 .onDisappear { model.stop() }
         }
-        .windowResizability(.contentMinSize)
+        .defaultSize(width: 1100, height: 720)
         .commands {
             CommandGroup(after: .newItem) {
                 Button("Scan Now") { model.scanNow() }

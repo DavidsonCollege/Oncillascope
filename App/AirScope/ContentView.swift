@@ -27,6 +27,7 @@ struct ContentView: View {
                     Label(panel.rawValue, systemImage: panel.icon).tag(panel)
                 }
             }
+            .listStyle(.sidebar)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220)
             .safeAreaInset(edge: .bottom) { SidebarStatus() }
         } detail: {
