@@ -15,26 +15,28 @@ struct ChannelMapView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Picker("Band", selection: $band) {
-                    ForEach([Band.ghz2_4, .ghz5, .ghz6], id: \.self) { Text($0.rawValue).tag($0) }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Picker("Band", selection: $band) {
+                        ForEach([Band.ghz2_4, .ghz5, .ghz6], id: \.self) { Text($0.rawValue).tag($0) }
+                    }
+                    .pickerStyle(.segmented).fixedSize()
+                    Spacer()
+                    Text("\(networksInBand.count) BSS in band").font(.caption).foregroundStyle(.secondary)
                 }
-                .pickerStyle(.segmented).fixedSize()
-                Spacer()
-                Text("\(networksInBand.count) BSS in band").font(.caption).foregroundStyle(.secondary)
-            }
 
-            if networksInBand.isEmpty {
-                ContentUnavailableView("No networks in \(band.rawValue)",
-                                       systemImage: "chart.bar.xaxis")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                recommendation
-                spectrumChart
+                if networksInBand.isEmpty {
+                    ContentUnavailableView("No networks in \(band.rawValue)",
+                                           systemImage: "chart.bar.xaxis")
+                        .frame(maxWidth: .infinity, minHeight: 360)
+                } else {
+                    recommendation
+                    spectrumChart
+                }
             }
+            .padding(16)
         }
-        .padding(16)
     }
 
     // MARK: - Spectrum chart
@@ -53,11 +55,23 @@ struct ChannelMapView: View {
             }
         }
         .chartYScale(domain: floorDBm...(-20))
+        .chartXScale(domain: bandFrequencyRange)
         .chartXAxisLabel("Frequency (MHz)")
         .chartYAxisLabel("RSSI (dBm)")
-        .frame(minHeight: 360)
+        .frame(height: 420)
         .padding(8)
         .background(.quaternary.opacity(0.2), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    /// X-axis frequency span for the selected band (MHz). Without this, Swift Charts
+    /// auto-scales from 0 and crushes every curve into a thin spike on the right.
+    private var bandFrequencyRange: ClosedRange<Int> {
+        switch band {
+        case .ghz2_4: return 2400...2500
+        case .ghz5: return 5150...5895
+        case .ghz6: return 5925...7125
+        case .unknown: return 0...1
+        }
     }
 
     /// Three points forming a peak centered on the channel, spanning its width.

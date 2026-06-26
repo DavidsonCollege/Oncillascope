@@ -36,17 +36,14 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            VStack(spacing: 0) {
-                List(selection: $selection) {
-                    ForEach(Panel.allCases) { panel in
-                        Label(panel.rawValue, systemImage: panel.icon).tag(panel)
-                    }
+            List(selection: $selection) {
+                ForEach(Panel.allCases) { panel in
+                    Label(panel.rawValue, systemImage: panel.icon).tag(panel)
                 }
-                .listStyle(.sidebar)
-                Divider()
-                SidebarStatus()
             }
+            .listStyle(.sidebar)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220)
+            .safeAreaInset(edge: .bottom) { SidebarStatus() }
         } detail: {
             VStack(spacing: 0) {
                 DegradedModeBanner()
