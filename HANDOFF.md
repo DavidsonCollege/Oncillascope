@@ -11,11 +11,16 @@ Read alongside `README.md` (what it does), `SIGNING.md` (signing/notarization), 
   `/Applications/Oncillascope.app` (Gatekeeper: "accepted / Notarized Developer ID").
 - ✅ Name **Oncillascope** finalized (was "AirScope" — taken on the Mac App Store).
 - ✅ Icon: user-supplied wildcat-eye + Wi-Fi + waveform (source in `design/`).
-- ✅ **SMAppService privileged helper built** (second target `OncillascopeHelper`):
-  compiles, signs (Developer ID, team 4Z539UE4TT, hardened runtime), embeds, deep-strict
-  verifies, Gatekeeper-accepted. **Not yet end-to-end tested** — registration/approval is
-  interactive (System Settings ▸ Login Items) and needs a notarized install. See
+- ✅ **SMAppService privileged helper built, signed, NOTARIZED & stapled** (second target
+  `OncillascopeHelper`): team 4Z539UE4TT, hardened runtime, embedded helper deep-strict
+  verifies, `spctl` → "Notarized Developer ID". Stapled build at `~/Downloads/Oncillascope-1.0.zip`.
+  **Not yet end-to-end tested** — registration/approval is interactive (System Settings ▸
+  Login Items & Extensions); install the new build and run the approval flow. See
   "Privileged helper" below.
+- 🔑 notarytool creds now stored in the Keychain profile **`OncillascopeNotary`** — notarize
+  with `xcrun notarytool submit <zip> --keychain-profile OncillascopeNotary --wait` (no
+  password needed). Re-store with `notarytool store-credentials` after rotating the
+  app-specific password.
 - Repo is **local git only** (`~/Github/macos-wifi-analyzer`), **not pushed**. Per the
   user's global rule, if pushed it goes under the **DavidsonCollege** GitHub org.
 
@@ -154,10 +159,10 @@ both binaries carry team `4Z539UE4TT`, `spctl` accepts as Developer ID.
    Items & Extensions) + XPC, and unlocks **continuous live PHY metrics** (the tick loop now
    refreshes wdutil every cycle when the helper is approved; otherwise it stays one-shot via
    the AppleScript fallback). Implementation (see "Privileged helper" section below).
-   **Remaining:** notarize the new build, install to `/Applications`, launch, click *Enable
-   Helper* (or View menu ▸ *Enable Continuous PHY Metrics*), approve in System Settings, and
-   confirm PHY metrics flow with no password prompt. This can't be exercised under ad-hoc
-   signing and the approval step is interactive, so it was not done here.
+   **Remaining (interactive):** install the notarized build to `/Applications`, launch, click
+   *Enable Helper* (or View menu ▸ *Enable Continuous PHY Metrics*), approve in System
+   Settings ▸ Login Items & Extensions, and confirm PHY metrics flow with no password prompt.
+   The build is notarized; only the GUI approval step is left.
 2. **Optional polish:** a simplified 16px icon variant (current art is busy at menu-bar size);
    Sparkle auto-update; CI to build+notarize on tag.
 3. **Housekeeping:** decide whether to push the repo to `DavidsonCollege` org; rotate the
