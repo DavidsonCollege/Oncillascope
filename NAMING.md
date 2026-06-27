@@ -64,11 +64,22 @@ company — the clearable, non-cheesy options are **clean wildcat-family names**
 **coined** words. (Avoid unfortunate substrings — e.g. "Margay" was dropped for that
 reason despite being clear.)
 
+**Fusions (Davidson *Lux* motto + a wireless root) — the on-brief winners:**
+
 | Name | App Store | Trademark / web | Verdict |
 |---|---|---|---|
-| **Manul** | no app (cameo in a cat game) | none found | ✅ **Top pick** — Pallas's cat (a real wildcat); short, clear, alert-eyed "watcher" |
-| **Felidae** | no app | none found (taxonomic term) | ✅ Clear — elegant "the cat family"; tasteful Wildcat nod |
-| **Oncilla** | no app | none found | ✅ Clear — but obscure / harder to spell |
+| **Signalux** | no app | none found | ✅ **Top pick** — *signal* (what the app measures) + *lux* (motto); reads like an RF-instrument brand |
+| **Wavelux** | no app | none found | ✅ Clear — *wave* + *lux* (note: reversed "Luxwave" is crowded; this isn't) |
+| Spectralux | no app | **Spectralux Avionics** (aerospace data-link comms) + reg. **SpectraLux®** | ❌ same field |
+| Wildband | no app | only a high-school band | ⚠️ clear but reads "music band" |
+
+**Cat-only names (lack the wireless half — kept for reference):**
+
+| Name | App Store | Trademark / web | Verdict |
+|---|---|---|---|
+| Manul | no app (cat-game cameo) | none found | ◻️ clear but no wireless tie |
+| Felidae | no app | none (taxonomic term) | ◻️ clear but no wireless tie |
+| Oncilla | no app | none found | ◻️ clear but obscure + no wireless tie |
 | Lynxa | "Lynxapp" dev only | near the busy "Lynx" family | ⚠️ coined (lynx + "links"); Lynx-adjacent |
 | Luxscope / Catwave / Wildwave | no app | mixed | ⚠️ workable but Lux-saturated / cutesy |
 | Margay | no app | none found | 🚫 clear, but rejected (substring) |
