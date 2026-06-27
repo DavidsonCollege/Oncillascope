@@ -15,6 +15,26 @@ app says so in its degraded-mode banner.
 
 ## 1. Run a signed dev build (un-redacted, local)
 
+> **Prerequisite that bit us once:** the *Apple Development* cert was present but showed
+> as **untrusted / "0 valid identities"** because the current **Apple WWDR G3** intermediate
+> (valid 2020–2030) was missing — only the expired 2013–2023 WWDR was installed. Fix:
+> ```bash
+> curl -fsSL -o AppleWWDRCAG3.cer https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
+> security import AppleWWDRCAG3.cer -k ~/Library/Keychains/login.keychain-db
+> security find-identity -v -p codesigning     # now lists "Apple Development: … (4Z539UE4TT)"
+> ```
+> Working local-signing command (universal, hardened runtime, stable team signature):
+> ```bash
+> xcodebuild -scheme Oncillascope -configuration Release -derivedDataPath build \
+>   CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Apple Development" \
+>   DEVELOPMENT_TEAM=4Z539UE4TT PROVISIONING_PROFILE_SPECIFIER="" build
+> ```
+> This signs with TeamIdentifier 4Z539UE4TT so Location/TCC grants persist. It's for
+> **local use only** — an Apple Development signature isn't notarized (Gatekeeper will
+> warn on *other* Macs) and the cert expires in a year. Distribution still needs the
+> **Developer ID Application** cert below.
+
+
 In Xcode, select the **Oncillascope** target → **Signing & Capabilities**:
 
 - Set **Team** to your Apple ID team.
