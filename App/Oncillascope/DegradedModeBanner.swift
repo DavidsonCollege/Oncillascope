@@ -16,8 +16,11 @@ struct DegradedModeBanner: View {
                     message: "macOS redacts network SSIDs and BSSIDs unless Oncillascope has Location Services access. This is required by macOS for Wi-Fi identity — Oncillascope does not track your location.",
                     actionTitle: model.location.access == .notDetermined ? "Grant Access" : "Open Settings",
                     action: {
+                        // Register the app + show the native prompt on a properly-signed
+                        // build, then always open the Location Services pane so the user
+                        // can enable it (the prompt alone is a no-op on unsigned builds).
                         if model.location.access == .notDetermined { model.location.request() }
-                        else { model.location.openSettings() }
+                        model.location.openSettings()
                     }
                 )
             }
