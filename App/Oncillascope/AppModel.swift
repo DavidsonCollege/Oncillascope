@@ -53,7 +53,7 @@ final class AppModel: ObservableObject {
 
     private let telemetry = TelemetryStore(capacity: 3600)
     private let iface = WiFiInterface()
-    // In-process AppleScript so the admin prompt is attributed to AirScope, not osascript.
+    // In-process AppleScript so the admin prompt is attributed to Oncillascope, not osascript.
     private let runner = WdutilRunner(strategy: .helper(invoke: runWdutilInfoWithAdminPrompt))
 
     private var refreshTask: Task<Void, Never>?
@@ -141,7 +141,7 @@ final class AppModel: ObservableObject {
 
     func startLogging() {
         let panel = NSSavePanel()
-        panel.nameFieldStringValue = "airscope-log.csv"
+        panel.nameFieldStringValue = "oncillascope-log.csv"
         panel.allowedContentTypes = [.commaSeparatedText]
         panel.canCreateDirectories = true
         panel.begin { [weak self] response in

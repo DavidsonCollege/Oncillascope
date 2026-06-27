@@ -9,19 +9,19 @@ import WiFiModel
 extension AppModel {
 
     func exportNetworksCSV() {
-        save(suggested: "airscope-networks.csv", type: .commaSeparatedText) {
+        save(suggested: "oncillascope-networks.csv", type: .commaSeparatedText) {
             Exporter.networksCSV(self.networks).data(using: .utf8)
         }
     }
 
     func exportTelemetryCSV() {
-        save(suggested: "airscope-telemetry.csv", type: .commaSeparatedText) {
+        save(suggested: "oncillascope-telemetry.csv", type: .commaSeparatedText) {
             Exporter.samplesCSV(self.samples).data(using: .utf8)
         }
     }
 
     func exportSnapshotJSON() {
-        save(suggested: "airscope-snapshot.json", type: .json) {
+        save(suggested: "oncillascope-snapshot.json", type: .json) {
             try? Exporter.json(self.currentSnapshot())
         }
     }

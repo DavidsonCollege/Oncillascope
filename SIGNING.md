@@ -15,7 +15,7 @@ app says so in its degraded-mode banner.
 
 ## 1. Run a signed dev build (un-redacted, local)
 
-In Xcode, select the **AirScope** target → **Signing & Capabilities**:
+In Xcode, select the **Oncillascope** target → **Signing & Capabilities**:
 
 - Set **Team** to your Apple ID team.
 - Signing style **Automatic** is fine for local dev.
@@ -23,14 +23,14 @@ In Xcode, select the **AirScope** target → **Signing & Capabilities**:
 Or via build settings / command line:
 
 ```bash
-xcodebuild -scheme AirScope -configuration Debug \
+xcodebuild -scheme Oncillascope -configuration Debug \
   CODE_SIGN_STYLE=Automatic \
   DEVELOPMENT_TEAM=YOUR_TEAM_ID \
   build
 ```
 
 Launch it once and **grant Location access** when prompted (or System Settings →
-Privacy & Security → Location Services → AirScope). BSSIDs are now real.
+Privacy & Security → Location Services → Oncillascope). BSSIDs are now real.
 
 > The Location prompt text is in `App/Info.plist`
 > (`NSLocationUsageDescription` / `NSLocationWhenInUseUsageDescription`) and explains the
@@ -56,7 +56,7 @@ security find-identity -v -p codesigning
 Once the cert is present, build a signed Release:
 
 ```bash
-xcodebuild -scheme AirScope -configuration Release \
+xcodebuild -scheme Oncillascope -configuration Release \
   CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="Developer ID Application" \
   DEVELOPMENT_TEAM=4Z539UE4TT \
@@ -65,7 +65,7 @@ xcodebuild -scheme AirScope -configuration Release \
 ```
 
 `ENABLE_HARDENED_RUNTIME = YES` is already set (required for notarization). The app is
-**non-sandboxed** by default (`App/AirScope.entitlements`) so it can spawn `wdutil`; see
+**non-sandboxed** by default (`App/Oncillascope.entitlements`) so it can spawn `wdutil`; see
 that file for how to adopt the App Sandbox + an `SMAppService` privileged helper instead.
 
 ---
@@ -74,13 +74,13 @@ that file for how to adopt the App Sandbox + an `SMAppService` privileged helper
 
 ```bash
 # Zip the .app
-ditto -c -k --keepParent build/Build/Products/Release/AirScope.app AirScope.zip
+ditto -c -k --keepParent build/Build/Products/Release/Oncillascope.app Oncillascope.zip
 
 # Submit (store credentials once with `xcrun notarytool store-credentials`)
-xcrun notarytool submit AirScope.zip --keychain-profile "AC_NOTARY" --wait
+xcrun notarytool submit Oncillascope.zip --keychain-profile "AC_NOTARY" --wait
 
 # Staple the ticket
-xcrun stapler staple build/Build/Products/Release/AirScope.app
+xcrun stapler staple build/Build/Products/Release/Oncillascope.app
 ```
 
 ---

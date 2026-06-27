@@ -5,7 +5,7 @@ import WdutilBridge
 ///
 /// Spawning `/usr/bin/osascript` makes macOS attribute the auth dialog to "osascript".
 /// Running the same AppleScript *in-process* via `NSAppleScript` attributes the request
-/// to the host application, so the dialog reads "AirScope wants to make changes." instead.
+/// to the host application, so the dialog reads "Oncillascope wants to make changes." instead.
 ///
 /// Executed on a background queue so the (system-owned) password dialog never blocks the
 /// main thread. This is the v1 approach; the cleaner production path is an SMAppService
@@ -15,8 +15,8 @@ func runWdutilInfoWithAdminPrompt() async throws -> String {
     try await withCheckedThrowingContinuation { (cont: CheckedContinuation<String, Error>) in
         DispatchQueue.global(qos: .userInitiated).async {
             // `with prompt` customizes the authentication dialog text (otherwise macOS
-            // shows the generic "AirScope wants to make changes.").
-            let prompt = "AirScope needs administrator access to read advanced Wi-Fi PHY-layer "
+            // shows the generic "Oncillascope wants to make changes.").
+            let prompt = "Oncillascope needs administrator access to read advanced Wi-Fi PHY-layer "
                 + "metrics (MCS index, spatial streams, guard interval, and CCA) for the current connection."
             let source = "do shell script \"/usr/bin/wdutil info\" "
                 + "with administrator privileges with prompt \"\(prompt)\""

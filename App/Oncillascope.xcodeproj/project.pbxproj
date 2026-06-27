@@ -16,15 +16,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		EA0000000000000000000006 /* AirScope.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirScope.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA0000000000000000000006 /* Oncillascope.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Oncillascope.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA0000000000000000000031 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		EA0000000000000000000032 /* AirScope.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AirScope.entitlements; sourceTree = "<group>"; };
+		EA0000000000000000000032 /* Oncillascope.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Oncillascope.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		EA0000000000000000000004 /* AirScope */ = {
+		EA0000000000000000000004 /* Oncillascope */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AirScope;
+			path = Oncillascope;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -49,9 +49,9 @@
 		EA0000000000000000000002 = {
 			isa = PBXGroup;
 			children = (
-				EA0000000000000000000004 /* AirScope */,
+				EA0000000000000000000004 /* Oncillascope */,
 				EA0000000000000000000031 /* Info.plist */,
-				EA0000000000000000000032 /* AirScope.entitlements */,
+				EA0000000000000000000032 /* Oncillascope.entitlements */,
 				EA0000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -59,7 +59,7 @@
 		EA0000000000000000000003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EA0000000000000000000006 /* AirScope.app */,
+				EA0000000000000000000006 /* Oncillascope.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -67,9 +67,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EA0000000000000000000005 /* AirScope */ = {
+		EA0000000000000000000005 /* Oncillascope */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EA000000000000000000000B /* Build configuration list for PBXNativeTarget "AirScope" */;
+			buildConfigurationList = EA000000000000000000000B /* Build configuration list for PBXNativeTarget "Oncillascope" */;
 			buildPhases = (
 				EA0000000000000000000007 /* Sources */,
 				EA0000000000000000000008 /* Frameworks */,
@@ -80,9 +80,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				EA0000000000000000000004 /* AirScope */,
+				EA0000000000000000000004 /* Oncillascope */,
 			);
-			name = AirScope;
+			name = Oncillascope;
 			packageProductDependencies = (
 				EA0000000000000000000011 /* WiFiCore */,
 				EA0000000000000000000012 /* WiFiModel */,
@@ -91,8 +91,8 @@
 				EA0000000000000000000015 /* OUIResolver */,
 				EA0000000000000000000016 /* Telemetry */,
 			);
-			productName = AirScope;
-			productReference = EA0000000000000000000006 /* AirScope.app */;
+			productName = Oncillascope;
+			productReference = EA0000000000000000000006 /* Oncillascope.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -110,7 +110,7 @@
 					};
 				};
 			};
-			buildConfigurationList = EA000000000000000000000A /* Build configuration list for PBXProject "AirScope" */;
+			buildConfigurationList = EA000000000000000000000A /* Build configuration list for PBXProject "Oncillascope" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -128,7 +128,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				EA0000000000000000000005 /* AirScope */,
+				EA0000000000000000000005 /* Oncillascope */,
 			);
 		};
 /* End PBXProject section */
@@ -200,7 +200,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = AirScope.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Oncillascope.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -215,7 +215,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.davidson.airscope;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.davidson.oncillascope;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -227,7 +227,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = AirScope.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Oncillascope.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -242,7 +242,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.davidson.airscope;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.davidson.oncillascope;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -252,7 +252,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EA000000000000000000000A /* Build configuration list for PBXProject "AirScope" */ = {
+		EA000000000000000000000A /* Build configuration list for PBXProject "Oncillascope" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EA000000000000000000000C /* Debug */,
@@ -261,7 +261,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EA000000000000000000000B /* Build configuration list for PBXNativeTarget "AirScope" */ = {
+		EA000000000000000000000B /* Build configuration list for PBXNativeTarget "Oncillascope" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EA000000000000000000000E /* Debug */,

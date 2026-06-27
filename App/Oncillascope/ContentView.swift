@@ -22,8 +22,8 @@ struct ContentView: View {
 
     init() {
         // Allow the initial panel to be chosen via env var (testing / screenshots):
-        // AIRSCOPE_PANEL = dashboard | networks | channels | logs
-        let env = ProcessInfo.processInfo.environment["AIRSCOPE_PANEL"]?.lowercased()
+        // ONCILLASCOPE_PANEL = dashboard | networks | channels | logs
+        let env = ProcessInfo.processInfo.environment["ONCILLASCOPE_PANEL"]?.lowercased()
         let initial: Panel
         switch env {
         case "networks": initial = .networks

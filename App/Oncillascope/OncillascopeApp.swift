@@ -12,7 +12,7 @@ private struct PlainEnglishTooltipsToggle: View {
 }
 
 @main
-struct AirScopeApp: App {
+struct OncillascopeApp: App {
     @StateObject private var model = AppModel()
 
     var body: some Scene {

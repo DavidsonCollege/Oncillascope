@@ -13,7 +13,7 @@
     <key>CFBundleName</key>
     <string>$(PRODUCT_NAME)</string>
     <key>CFBundleDisplayName</key>
-    <string>AirScope</string>
+    <string>Oncillascope</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -29,10 +29,10 @@
     <key>NSHumanReadableCopyright</key>
     <string>MIT License. Open source.</string>
     <key>NSLocationUsageDescription</key>
-    <string>AirScope needs Location access because macOS only reveals Wi-Fi network names (SSID) and hardware addresses (BSSID) to apps with this permission. AirScope does not track or store your location.</string>
+    <string>Oncillascope needs Location access because macOS only reveals Wi-Fi network names (SSID) and hardware addresses (BSSID) to apps with this permission. Oncillascope does not track or store your location.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>AirScope needs Location access because macOS only reveals Wi-Fi network names (SSID) and hardware addresses (BSSID) to apps with this permission. AirScope does not track or store your location.</string>
+    <string>Oncillascope needs Location access because macOS only reveals Wi-Fi network names (SSID) and hardware addresses (BSSID) to apps with this permission. Oncillascope does not track or store your location.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>AirScope needs Location access because macOS only reveals Wi-Fi network names (SSID) and hardware addresses (BSSID) to apps with this permission. AirScope does not track or store your location.</string>
+    <string>Oncillascope needs Location access because macOS only reveals Wi-Fi network names (SSID) and hardware addresses (BSSID) to apps with this permission. Oncillascope does not track or store your location.</string>
 </dict>
 </plist>

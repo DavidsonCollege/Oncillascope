@@ -1,4 +1,4 @@
-# AirScope — native macOS Wi-Fi analyzer
+# Oncillascope — native macOS Wi-Fi analyzer
 
 A free, open-source macOS app that surfaces **as much RF / Wi-Fi detail as the native
 Apple wireless adapter and its system APIs allow** — for the current connection and for
@@ -6,7 +6,7 @@ all visible nearby networks. It aims to match or exceed paid tools (WiFi Explore
 WiFi Signal) while staying inside what Apple permits on stock hardware: no external USB
 radios, no kernel extensions, no monitor mode.
 
-The defining feature is **completeness**: AirScope fuses every available data source —
+The defining feature is **completeness**: Oncillascope fuses every available data source —
 CoreWLAN (identity, live stats, scan, raw IEs), parsed `wdutil info` (PHY-layer metrics),
 and a pure-Swift 802.11 Information Element parser — into one view.
 
@@ -37,10 +37,10 @@ and a pure-Swift 802.11 Information Element parser — into one view.
 
 ## The macOS reality (this bounds the whole project)
 
-Apple has progressively restricted Wi-Fi telemetry. AirScope is designed *around* these
+Apple has progressively restricted Wi-Fi telemetry. Oncillascope is designed *around* these
 constraints, not against them:
 
-| Constraint | How AirScope handles it |
+| Constraint | How Oncillascope handles it |
 |---|---|
 | The `airport` CLI was removed (macOS 14.4+). | Never used. |
 | `wdutil` needs `sudo` for every option. | One up-front admin auth; clearly degraded if declined. |
@@ -49,7 +49,7 @@ constraints, not against them:
 | `wdutil` redacts SSID/BSSID/MAC. | Treated as a PHY-metrics source only; identity comes from CoreWLAN. |
 | No monitor mode on the built-in adapter. | No packet capture / sniffing / true spectrum analysis. Channel "utilization" is read from the **BSS Load IE** only. |
 
-If Location is denied or admin auth is declined, AirScope **tells you exactly which
+If Location is denied or admin auth is declined, Oncillascope **tells you exactly which
 fields are redacted and why**, and offers a one-click path to fix it — never silent blanks.
 
 ---
@@ -85,9 +85,9 @@ swift test     # 34 tests
 ### The app
 
 ```bash
-open App/AirScope.xcodeproj      # then ⌘R in Xcode
+open App/Oncillascope.xcodeproj      # then ⌘R in Xcode
 # or headless:
-xcodebuild -scheme AirScope -configuration Debug build
+xcodebuild -scheme Oncillascope -configuration Debug build
 ```
 
 A plain build is **ad-hoc signed** and runs in clearly-labeled degraded mode (BSSIDs may

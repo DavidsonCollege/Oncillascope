@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "EA0000000000000000000005"
-               BuildableName = "AirScope.app"
-               BlueprintName = "AirScope"
-               ReferencedContainer = "container:AirScope.xcodeproj">
+               BuildableName = "Oncillascope.app"
+               BlueprintName = "Oncillascope"
+               ReferencedContainer = "container:Oncillascope.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -43,9 +43,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EA0000000000000000000005"
-            BuildableName = "AirScope.app"
-            BlueprintName = "AirScope"
-            ReferencedContainer = "container:AirScope.xcodeproj">
+            BuildableName = "Oncillascope.app"
+            BlueprintName = "Oncillascope"
+            ReferencedContainer = "container:Oncillascope.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -60,9 +60,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EA0000000000000000000005"
-            BuildableName = "AirScope.app"
-            BlueprintName = "AirScope"
-            ReferencedContainer = "container:AirScope.xcodeproj">
+            BuildableName = "Oncillascope.app"
+            BlueprintName = "Oncillascope"
+            ReferencedContainer = "container:Oncillascope.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

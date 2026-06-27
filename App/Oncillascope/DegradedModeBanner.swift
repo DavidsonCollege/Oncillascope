@@ -13,7 +13,7 @@ struct DegradedModeBanner: View {
                     icon: "location.slash.fill",
                     tint: .orange,
                     title: locationTitle,
-                    message: "macOS redacts network SSIDs and BSSIDs unless AirScope has Location Services access. This is required by macOS for Wi-Fi identity — AirScope does not track your location.",
+                    message: "macOS redacts network SSIDs and BSSIDs unless Oncillascope has Location Services access. This is required by macOS for Wi-Fi identity — Oncillascope does not track your location.",
                     actionTitle: model.location.access == .notDetermined ? "Grant Access" : "Open Settings",
                     action: {
                         if model.location.access == .notDetermined { model.location.request() }

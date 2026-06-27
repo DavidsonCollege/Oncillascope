@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <!--
-      AirScope ships non-sandboxed (Developer-ID side-load, spec §5): the App Sandbox
+      Oncillascope ships non-sandboxed (Developer-ID side-load, spec §5): the App Sandbox
       complicates spawning `wdutil` / a privileged helper. CoreWLAN and Location work
       without a sandbox. Outgoing network is enabled only for the optional OUI update.
 
