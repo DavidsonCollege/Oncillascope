@@ -73,15 +73,24 @@ security find-identity -v -p codesigning
 # expect: …  "Developer ID Application: <name> (4Z539UE4TT)"
 ```
 
-Once the cert is present, build a signed Release:
+Once the cert is present, build a signed Release. **Two flags matter** (learned the hard
+way): `--timestamp` (secure timestamp, required by notarization) and
+`CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO` (otherwise Xcode injects
+`com.apple.security.get-task-allow`, the debug "let a debugger attach" entitlement, and
+**notarization rejects it** with "critical validation errors"):
 
 ```bash
-xcodebuild -scheme Oncillascope -configuration Release \
+xcodebuild -scheme Oncillascope -configuration Release -derivedDataPath build \
   CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="Developer ID Application" \
   DEVELOPMENT_TEAM=4Z539UE4TT \
-  -derivedDataPath build \
+  PROVISIONING_PROFILE_SPECIFIER="" \
+  OTHER_CODE_SIGN_FLAGS="--timestamp" \
+  CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
   build
+
+# sanity: entitlements should be ONLY network.client (no get-task-allow)
+codesign -d --entitlements :- build/Build/Products/Release/Oncillascope.app
 ```
 
 `ENABLE_HARDENED_RUNTIME = YES` is already set (required for notarization). The app is
@@ -90,18 +99,25 @@ that file for how to adopt the App Sandbox + an `SMAppService` privileged helper
 
 ---
 
-## 3. Notarize
+## 3. Notarize + staple (verified working 2026-06-26)
 
 ```bash
-# Zip the .app
-ditto -c -k --keepParent build/Build/Products/Release/Oncillascope.app Oncillascope.zip
+APP=build/Build/Products/Release/Oncillascope.app
+ditto -c -k --keepParent "$APP" Oncillascope.zip
 
-# Submit (store credentials once with `xcrun notarytool store-credentials`)
-xcrun notarytool submit Oncillascope.zip --keychain-profile "AC_NOTARY" --wait
+# App-specific password from appleid.apple.com ▸ Sign-In & Security ▸ App-Specific Passwords.
+xcrun notarytool submit Oncillascope.zip \
+  --apple-id jdmills@davidson.edu --team-id 4Z539UE4TT --password "<app-specific-pw>" --wait
+# → "status: Accepted". On "Invalid", read the reason:
+#   xcrun notarytool log <submission-id> --apple-id … --team-id … --password …
 
-# Staple the ticket
-xcrun stapler staple build/Build/Products/Release/Oncillascope.app
+xcrun stapler staple "$APP"               # embed the ticket (works offline)
+xcrun stapler validate "$APP"
+spctl -a -t exec -vvv "$APP"              # → accepted / source=Notarized Developer ID
 ```
+
+Distribute the **stapled** `.app` (e.g. zipped). Colleagues then open it with no Gatekeeper
+block — at most a normal "downloaded from the internet" confirmation.
 
 ---
 
