@@ -1,0 +1,127 @@
+# Oncillascope — handoff
+
+A native macOS Wi-Fi / RF analyzer (Swift + SwiftUI). This doc orients a new agent fast.
+Read alongside `README.md` (what it does), `SIGNING.md` (signing/notarization), and
+`NAMING.md` (name vetting history).
+
+## TL;DR status (2026-06-26)
+
+- ✅ Core + app **built, tested (34/34), signed, NOTARIZED, and installed**.
+- ✅ Shareable notarized build: `~/Downloads/Oncillascope-1.0.zip`; installed at
+  `/Applications/Oncillascope.app` (Gatekeeper: "accepted / Notarized Developer ID").
+- ✅ Name **Oncillascope** finalized (was "AirScope" — taken on the Mac App Store).
+- ✅ Icon: user-supplied wildcat-eye + Wi-Fi + waveform (source in `design/`).
+- 🔜 **Next major feature: SMAppService privileged helper** (see "What comes next").
+- Repo is **local git only** (`~/Github/macos-wifi-analyzer`), **not pushed**. Per the
+  user's global rule, if pushed it goes under the **DavidsonCollege** GitHub org.
+
+## What it is
+
+Surfaces as much Wi-Fi/RF detail as macOS allows, fusing three sources: CoreWLAN
+(identity, live stats, scan, raw IEs), parsed `wdutil info` (PHY metrics: MCS/NSS/guard
+interval/CCA — needs admin), and a pure-Swift 802.11 Information Element parser. Panes:
+Dashboard (live tiles + Swift Charts), Nearby Networks (sortable/filterable table + IE
+inspector), Channel Map (spectrum curves + best-channel advice), Telemetry & Export.
+
+## Repo layout
+
+- `Package.swift` — SwiftPM package **`WiFiAnalyzerKit`** (internal name, never user-facing).
+  - `Sources/WiFiModel` — value types + OFDM PHY-rate calculator (HT/VHT/HE/EHT).
+  - `Sources/IEParser` — pure-Swift 802.11 IE decoder (the crown jewel; heavily tested).
+  - `Sources/WdutilBridge` — `wdutil info` parser + runner (strategies: directSudo /
+    osascriptAdmin / helper closure).
+  - `Sources/OUIResolver` — offline BSSID→vendor (bundled `Resources/oui.csv`).
+  - `Sources/Telemetry` — ring buffers + CSV/JSON export + roam/channel markers.
+  - `Sources/WiFiCore` — CoreWLAN + CoreLocation wrappers; fuses everything.
+  - `Tests/*` — 34 tests (IEParser, WdutilBridge, OUIResolver, Telemetry).
+- `App/Oncillascope.xcodeproj` — **hand-crafted** pbxproj (objectVersion 77, uses a
+  `PBXFileSystemSynchronizedRootGroup`, so source files aren't listed individually).
+  - `App/Oncillascope/` — SwiftUI sources + `Assets.xcassets` (AppIcon, AccentColor).
+  - `App/Info.plist`, `App/Oncillascope.entitlements` (at SRCROOT, not in the sync folder).
+- `design/oncillascope-icon-source-1254.png` — canonical icon art.
+
+## Build / test / run
+
+```bash
+swift test                                   # 34 core tests
+xcodebuild -scheme Oncillascope -configuration Release build   # the app
+```
+- **Always use `-scheme Oncillascope`, never `-target`** — `-target` splits the build graph
+  and the SwiftPM resource-bundle copy (`WiFiAnalyzerKit_OUIResolver.bundle`) fails.
+- Plain builds are **ad-hoc signed** → degraded mode (BSSIDs redacted, Location won't stick).
+- Bundle id `edu.davidson.oncillascope`, scheme/target/product `Oncillascope`.
+
+## Signing & notarization (WORKING — full recipe in SIGNING.md)
+
+- **Team ID `4Z539UE4TT`** = "The Trustees of Davidson College" (org account).
+- Identities now in the keychain: **Developer ID Application** (cert+key imported from
+  `~/Downloads/Davidson Apple Developer ID Application.p12`, pw was "application") and an
+  Apple Development cert. Required installing the **WWDR G3** intermediate first
+  (`security import AppleWWDRCAG3.cer`) or certs showed as untrusted/"0 valid identities".
+- Signed Release recipe (two non-obvious flags):
+  ```bash
+  xcodebuild -scheme Oncillascope -configuration Release -derivedDataPath build \
+    CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Developer ID Application" \
+    DEVELOPMENT_TEAM=4Z539UE4TT PROVISIONING_PROFILE_SPECIFIER="" \
+    OTHER_CODE_SIGN_FLAGS="--timestamp" CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO build
+  ```
+  `CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO` is **mandatory** — otherwise notarization rejects
+  the injected `com.apple.security.get-task-allow` debug entitlement ("Invalid").
+- Notarize: `xcrun notarytool submit … --apple-id jdmills@davidson.edu --team-id 4Z539UE4TT
+  --password <app-specific> --wait`, then `xcrun stapler staple <app>`.
+- **Security note:** an app-specific password was shared in chat; user should rotate it at
+  appleid.apple.com. Nothing in the repo depends on it.
+
+## Key decisions & hard-won gotchas
+
+- **Distribution model = Developer ID (NOT Mac App Store).** The App Store sandbox forbids
+  running `wdutil` as root, which would kill the PHY-metrics feature. So we ship signed +
+  notarized outside the store. App is **non-sandboxed**, hardened-runtime on.
+- **SwiftUI layout traps (all fixed, don't reintroduce):**
+  - Never put `.frame(minWidth:…)` on the `NavigationSplitView` root — it collapses the
+    sidebar + detail to blank. Size via the scene; cap the **detail's** ideal size instead.
+  - The window ballooned (1470×3541) because scrolling panels reported a tall ideal height;
+    fixed by capping the detail's `idealHeight` while keeping `maxHeight: .infinity`.
+  - Debug builds use an Xcode "debug dylib"/preview thunk that renders flaky when launched
+    via `open` outside Xcode — use **Release** for screenshot/QA.
+- **macOS specifics:** macOS does NOT auto-round app icons (unlike iOS) — icon art has the
+  ~22.37% continuous-corner rounding baked in. `tccutil` can't remove orphaned Location
+  Services rows (SIP-protected); a reboot prunes them.
+- **wdutil admin prompt:** done **in-process** via `NSAppleScript` (`do shell script … with
+  administrator privileges with prompt "…"`) so the dialog is attributed to *Oncillascope*
+  with a tool-agnostic message — NOT by spawning `/usr/bin/osascript` (which showed
+  "osascript"). See `App/Oncillascope/WdutilAuth.swift`.
+
+## Features implemented
+
+Dashboard (equal-height metric tiles, color-coded SNR/efficiency, live RSSI/Noise/SNR/
+TxRate/MCS/CCA charts with roam markers); Nearby Networks table (sort/filter/group-by-SSID,
+Location-aware redaction); Channel Map (per-band spectrum curves with **hover tooltips**
+showing SSID/BSSID, advisory best-channel, **6 GHz "not supported" detection** on radios
+that lack it — this Mac is a Mac14,2 w/ no 6 GHz); IE inspector (decoded tree). **Tooltips**
+on every dashboard + inspector reading and every 802.11 IE, with a **View ▸ Plain-English
+Tooltips** menu toggle (`@AppStorage` key `plainEnglishTooltips`) switching technical↔plain
+(see `Help` enum in `App/Oncillascope/UIHelpers.swift`). Tx Power shown in mW + dBm.
+Degraded-mode banners explain redaction; "Grant Access" opens Location Services settings.
+
+## What comes next
+
+1. **SMAppService privileged helper (top priority — discussed, not built).** Replaces the
+   per-session admin password prompt with a one-time approval (System Settings ▸ Login Items
+   & Extensions) + XPC, and unlocks **continuous live PHY metrics** (currently one-shot to
+   avoid re-prompting). Now feasible because the Developer ID cert exists. Work: a second
+   (helper) target running as root, a shared XPC protocol, the daemon launchd plist embedded
+   in the bundle, app-side `SMAppService.daemon(...).register()`, an XPC client, and pbxproj
+   wiring for the second target. Must stay signed/notarized; can't be verified under ad-hoc
+   signing. The `WdutilRunner.Strategy.helper(invoke:)` hook is the intended integration point.
+2. **Optional polish:** a simplified 16px icon variant (current art is busy at menu-bar size);
+   Sparkle auto-update; CI to build+notarize on tag.
+3. **Housekeeping:** decide whether to push the repo to `DavidsonCollege` org; rotate the
+   leaked app-specific password.
+
+## Environment
+
+Built/verified on macOS 26.5 (Tahoe), Xcode 26.6, Apple Silicon. Min target macOS 14.
+User: JD Mills (jdmills@davidson.edu). Prefers concise responses, root-cause fixes, no
+emojis; "just build" (skip brainstorming). Memory note lives at the agent's
+`memory/oncillascope.md`.
