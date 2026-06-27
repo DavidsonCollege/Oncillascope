@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+      launchd configuration for the Oncillascope privileged helper, registered via
+      SMAppService.daemon(plistName:). Embedded at Contents/Library/LaunchDaemons/ and
+      copied into the app bundle by the app target's "Embed Helper Daemon" build phase.
+
+      Runs as root so it can invoke `wdutil info` (which requires root for every option).
+      Launched on demand: launchd starts the helper when a message arrives on the Mach
+      service below, so there is no idle root process.
+    -->
+    <key>Label</key>
+    <string>edu.davidson.oncillascope.helper</string>
+
+    <!-- Path to the helper executable, relative to the app bundle root. -->
+    <key>BundleProgram</key>
+    <string>Contents/MacOS/OncillascopeHelper</string>
+
+    <!-- The Mach service the app connects to; must match NSXPCListener(machServiceName:). -->
+    <key>MachServices</key>
+    <dict>
+        <key>edu.davidson.oncillascope.helper</key>
+        <true/>
+    </dict>
+
+    <!-- Associates this daemon with the app so it appears under Oncillascope in
+         System Settings ▸ Login Items & Extensions. -->
+    <key>AssociatedBundleIdentifiers</key>
+    <array>
+        <string>edu.davidson.oncillascope</string>
+    </array>
+
+    <key>UserName</key>
+    <string>root</string>
+</dict>
+</plist>
