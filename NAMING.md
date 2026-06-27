@@ -64,7 +64,18 @@ company — the clearable, non-cheesy options are **clean wildcat-family names**
 **coined** words. (Avoid unfortunate substrings — e.g. "Margay" was dropped for that
 reason despite being clear.)
 
-**Fusions (Davidson *Lux* motto + a wireless root) — the on-brief winners:**
+### ⭐ Chosen direction: **Oncillascope**
+
+*oncilla* (a real wildcat → Davidson Wildcat) + *-scope* (oscilloscope / spectrum-scope →
+the analyzer). Coined compound; **zero hits anywhere** — no App Store app, company,
+trademark, or web presence. Distinctive and on-brief. Caveat: visually near "oscilloscope"
+(reads as clever wordplay for a signal analyzer, or a typo to some) and a touch long.
+
+| Name | App Store | Trademark / web | Verdict |
+|---|---|---|---|
+| **Oncillascope** | no app | none anywhere | ✅ **Chosen** — clear, distinctive, wildcat + scope |
+
+**Fusions (Davidson *Lux* motto + a wireless root):**
 
 | Name | App Store | Trademark / web | Verdict |
 |---|---|---|---|
