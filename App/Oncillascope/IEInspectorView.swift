@@ -4,6 +4,7 @@ import WiFiModel
 /// Per-BSS detail with the fully decoded IE tree (spec §4.5).
 struct IEInspectorView: View {
     let network: BSSObservation
+    @AppStorage(plainEnglishTooltipsKey) private var plainEnglish = false
 
     var body: some View {
         ScrollView {
@@ -15,7 +16,9 @@ struct IEInspectorView: View {
                     Text("No raw IE data (CoreWLAN returned none for this BSS).")
                         .font(.callout).foregroundStyle(.secondary)
                 } else {
-                    ForEach(network.rawIEs) { ie in IERow(ie: ie) }
+                    ForEach(network.rawIEs) { ie in
+                        IERow(ie: ie, help: Help.ieDescription(elementID: ie.elementID, extID: ie.extensionID))
+                    }
                 }
             }
             .padding(16)
@@ -26,49 +29,51 @@ struct IEInspectorView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(network.ssid?.isEmpty == false ? network.ssid! : "<hidden>")
                 .font(.title2).fontWeight(.bold)
-            row("BSSID", network.bssid ?? "—")
-            row("Vendor", network.vendor ?? "—")
-            row("Channel", "\(network.channel.label) · \(network.channel.band.rawValue)")
-            row("Security", network.security.rawValue)
-            row("PHY", "\(network.phyGeneration.standardLabel) (\(network.phyGeneration.wifiLabel))")
-            row("RSSI / SNR", "\(network.rssi) dBm / \(network.snr) dB")
-            row("Beacon interval", "\(network.beaconInterval) TU")
+            row("BSSID", network.bssid ?? "—", Help.bssid)
+            row("Vendor", network.vendor ?? "—", Help.vendor)
+            row("Channel", "\(network.channel.label) · \(network.channel.band.rawValue)", Help.channelInfo)
+            row("Security", network.security.rawValue, Help.security)
+            row("PHY", "\(network.phyGeneration.standardLabel) (\(network.phyGeneration.wifiLabel))", Help.phyGen)
+            row("RSSI / SNR", "\(network.rssi) dBm / \(network.snr) dB", Help.snr)
+            row("Beacon interval", "\(network.beaconInterval) TU", Help.beaconInterval)
             if let rate = network.maxTheoreticalRate {
-                row("Max PHY rate", String(format: "%.0f Mbps", rate))
+                row("Max PHY rate", String(format: "%.0f Mbps", rate), Help.maxRate)
             }
             if let caps = network.capabilities {
                 capabilityChips(caps)
             }
             if let load = network.bssLoad {
-                row("Channel utilization", "\(Int(load.channelUtilization))%")
-                row("Associated stations", "\(load.stationCount)")
+                row("Channel utilization", "\(Int(load.channelUtilization))%", Help.utilization)
+                row("Associated stations", "\(load.stationCount)", Help.stations)
             }
         }
     }
 
-    @ViewBuilder private func capabilityChips(_ c: CapabilitySet) -> some View {
-        FlowChips(chips: [
-            c.spatialStreams.map { "\($0) streams" },
-            c.maxMCS.map { "MCS \($0)" },
-            c.maxWidth.map { $0.label },
-            (c.supportsMUMIMO == true) ? "MU-MIMO" : nil,
-            (c.supportsOFDMA == true) ? "OFDMA" : nil,
-            (c.supports160MHz == true) ? "160 MHz" : nil,
-        ].compactMap { $0 })
+    private func capabilityChips(_ c: CapabilitySet) -> some View {
+        var items: [(text: String, help: String)] = []
+        if let n = c.spatialStreams { items.append(("\(n) streams", Help.nss.resolved(plain: plainEnglish))) }
+        if let m = c.maxMCS { items.append(("MCS \(m)", Help.mcs.resolved(plain: plainEnglish))) }
+        if let w = c.maxWidth { items.append((w.label, Help.channelWidth.resolved(plain: plainEnglish))) }
+        if c.supportsMUMIMO == true { items.append(("MU-MIMO", Help.muMIMO.resolved(plain: plainEnglish))) }
+        if c.supportsOFDMA == true { items.append(("OFDMA", Help.ofdma.resolved(plain: plainEnglish))) }
+        if c.supports160MHz == true { items.append(("160 MHz", Help.channelWidth.resolved(plain: plainEnglish))) }
+        return FlowChips(chips: items)
     }
 
-    @ViewBuilder private func row(_ k: String, _ v: String) -> some View {
+    @ViewBuilder private func row(_ k: String, _ v: String, _ help: Help.Entry) -> some View {
         HStack(alignment: .top) {
             Text(k).foregroundStyle(.secondary).frame(width: 130, alignment: .leading)
             Text(v).textSelection(.enabled)
         }
         .font(.callout)
+        .help(help.resolved(plain: plainEnglish))
     }
 }
 
 /// One expandable decoded element with hex dump + interpretation.
 private struct IERow: View {
     let ie: InformationElement
+    let help: String
     @State private var expanded = false
 
     var body: some View {
@@ -93,6 +98,8 @@ private struct IERow: View {
                 Text(idLabel).font(.caption2).foregroundStyle(.secondary)
                 Text("\(ie.bytes.count) B").font(.caption2).foregroundStyle(.tertiary)
             }
+            .contentShape(Rectangle())
+            .help(help)
         }
     }
 
@@ -102,9 +109,9 @@ private struct IERow: View {
     }
 }
 
-/// Simple wrapping chip row.
+/// Simple wrapping chip row; each chip carries its own hover tooltip.
 private struct FlowChips: View {
-    let chips: [String]
+    let chips: [(text: String, help: String)]
     var body: some View {
         ViewThatFits(in: .horizontal) {
             HStack { chipViews }
@@ -112,6 +119,8 @@ private struct FlowChips: View {
         }
     }
     @ViewBuilder private var chipViews: some View {
-        ForEach(chips, id: \.self) { Badge(text: $0, color: .accentColor) }
+        ForEach(chips, id: \.text) { chip in
+            Badge(text: chip.text, color: .accentColor).help(chip.help)
+        }
     }
 }
