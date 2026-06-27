@@ -53,8 +53,12 @@ final class AppModel: ObservableObject {
 
     private let telemetry = TelemetryStore(capacity: 3600)
     private let iface = WiFiInterface()
-    // In-process AppleScript so the admin prompt is attributed to Oncillascope, not osascript.
-    private let runner = WdutilRunner(strategy: .helper(invoke: runWdutilInfoWithAdminPrompt))
+
+    // Privileged helper daemon. When approved it provides continuous, prompt-free PHY
+    // metrics over XPC; otherwise we fall back to a per-session in-process admin prompt.
+    private let helper = HelperManager()
+    /// Mirrors the daemon's lifecycle for the UI (banner + View menu).
+    @Published private(set) var helperStatus: HelperManager.Status = .notRegistered
 
     private var refreshTask: Task<Void, Never>?
     private var lastScanTick = Date.distantPast
@@ -85,9 +89,13 @@ final class AppModel: ObservableObject {
         Task { self.supportedBands = await Task.detached { iface.supportedBands() }.value }
         if location.access == .notDetermined { location.request() }
         // Don't auto-prompt for admin on launch — show the banner and let the user
-        // click Authorize, which presents the password dialog once.
+        // click Authorize (one-shot prompt) or enable the helper (continuous, no prompt).
+        helperStatus = helper.currentStatus()
         wdutil = .needsAuth
         scanNow()
+        // If the helper is already approved, fetch PHY metrics immediately and let the loop
+        // keep them live without any prompt.
+        if helperStatus.isUsable { Task { await refreshWdutil() } }
         startLoop()
     }
 
@@ -110,6 +118,12 @@ final class AppModel: ObservableObject {
 
     private func tick() async {
         guard !isPaused else { return }
+
+        // With the helper approved, refresh PHY metrics every tick — XPC is silent, so
+        // there's no prompt to avoid. Without it we leave wdutil one-shot (user-triggered)
+        // so we never re-show the admin dialog.
+        if helperStatus.isUsable { await refreshWdutil() }
+
         await refreshCurrent()
 
         // Periodic background rescan (radio retune; keep it infrequent).
@@ -213,7 +227,16 @@ final class AppModel: ObservableObject {
     // MARK: - wdutil PHY metrics
 
     func refreshWdutil() async {
-        let runner = self.runner
+        // Prefer the prompt-free helper when it's approved; otherwise fall back to the
+        // in-process admin prompt (attributed to Oncillascope, not osascript).
+        let invoke: @Sendable () async throws -> String
+        if helperStatus.isUsable {
+            let helper = self.helper
+            invoke = { try await helper.fetchWdutilInfo() }
+        } else {
+            invoke = runWdutilInfoWithAdminPrompt
+        }
+        let runner = WdutilRunner(strategy: .helper(invoke: invoke))
         let outcome: WdutilState = await Task.detached {
             do {
                 let m = try await runner.fetchMetrics()
@@ -229,6 +252,34 @@ final class AppModel: ObservableObject {
             }
         }.value
         wdutil = outcome
+    }
+
+    // MARK: - Privileged helper
+
+    /// True when the helper is approved and feeding continuous metrics.
+    var helperUsable: Bool { helperStatus.isUsable }
+
+    /// Install the helper (and open Login Items if approval is pending). Idempotent.
+    func enableHelper() {
+        helperStatus = helper.register()
+        if helperStatus.isUsable { Task { await refreshWdutil() } }
+    }
+
+    /// Re-check status after the user has been to System Settings, then start metrics.
+    func confirmHelperApproval() {
+        helperStatus = helper.currentStatus()
+        if helperStatus.isUsable { Task { await refreshWdutil() } }
+    }
+
+    func openHelperSettings() { helper.openLoginItemsSettings() }
+
+    func disableHelper() {
+        Task {
+            await helper.unregister()
+            helperStatus = helper.currentStatus()
+            // Drop back to the one-shot prompt path until re-enabled.
+            wdutil = .needsAuth
+        }
     }
 
     // MARK: - Telemetry control

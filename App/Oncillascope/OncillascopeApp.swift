@@ -11,6 +11,26 @@ private struct PlainEnglishTooltipsToggle: View {
     }
 }
 
+/// Menu commands for the privileged helper that powers continuous PHY metrics.
+/// State-aware: shows install/approve/disable depending on the daemon's lifecycle.
+private struct HelperMenu: View {
+    @ObservedObject var model: AppModel
+    var body: some View {
+        switch model.helperStatus {
+        case .enabled:
+            Button("Disable PHY Metrics Helper") { model.disableHelper() }
+        case .requiresApproval:
+            Button("Approve PHY Metrics Helper…") { model.openHelperSettings() }
+            Button("I Approved the Helper") { model.confirmHelperApproval() }
+        case .notRegistered:
+            Button("Enable Continuous PHY Metrics…") { model.enableHelper() }
+        case .notFound, .failed:
+            Button("Enable Continuous PHY Metrics…") { model.enableHelper() }
+                .disabled(true)
+        }
+    }
+}
+
 @main
 struct OncillascopeApp: App {
     @StateObject private var model = AppModel()
@@ -30,6 +50,8 @@ struct OncillascopeApp: App {
         .commands {
             CommandGroup(after: .sidebar) {
                 PlainEnglishTooltipsToggle()
+                Divider()
+                HelperMenu(model: model)
                 Divider()
             }
             CommandGroup(after: .newItem) {

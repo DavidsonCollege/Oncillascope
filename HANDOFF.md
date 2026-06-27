@@ -11,7 +11,11 @@ Read alongside `README.md` (what it does), `SIGNING.md` (signing/notarization), 
   `/Applications/Oncillascope.app` (Gatekeeper: "accepted / Notarized Developer ID").
 - ✅ Name **Oncillascope** finalized (was "AirScope" — taken on the Mac App Store).
 - ✅ Icon: user-supplied wildcat-eye + Wi-Fi + waveform (source in `design/`).
-- 🔜 **Next major feature: SMAppService privileged helper** (see "What comes next").
+- ✅ **SMAppService privileged helper built** (second target `OncillascopeHelper`):
+  compiles, signs (Developer ID, team 4Z539UE4TT, hardened runtime), embeds, deep-strict
+  verifies, Gatekeeper-accepted. **Not yet end-to-end tested** — registration/approval is
+  interactive (System Settings ▸ Login Items) and needs a notarized install. See
+  "Privileged helper" below.
 - Repo is **local git only** (`~/Github/macos-wifi-analyzer`), **not pushed**. Per the
   user's global rule, if pushed it goes under the **DavidsonCollege** GitHub org.
 
@@ -104,16 +108,56 @@ Tooltips** menu toggle (`@AppStorage` key `plainEnglishTooltips`) switching tech
 (see `Help` enum in `App/Oncillascope/UIHelpers.swift`). Tx Power shown in mW + dBm.
 Degraded-mode banners explain redaction; "Grant Access" opens Location Services settings.
 
+## Privileged helper (SMAppService)
+
+Second Xcode target **`OncillascopeHelper`** — a `com.apple.product-type.tool` daemon that
+runs as **root** and vends one XPC method (`fetchWdutilInfo`). Files:
+
+- `App/Shared/HelperProtocol.swift` — the `@objc OncillascopeHelperProtocol` + `HelperConstants`
+  (mach service / label / bundle id `edu.davidson.oncillascope.helper`, team id, and the
+  code-signing requirement strings). **Compiled into both targets** (one physical file, two
+  explicit pbxproj references) so the ObjC protocol name matches across the XPC boundary —
+  no separate package module, no static/dynamic-link question.
+- `App/OncillascopeHelper/{main.swift,HelperService.swift}` — `NSXPCListener` on the mach
+  service; `setCodeSigningRequirement` rejects any client that isn't the genuine same-team
+  app; `HelperService` shells `/usr/bin/wdutil info`. Only that one operation is exposed (no
+  general command execution).
+- `App/edu.davidson.oncillascope.helper.plist` — launchd plist embedded at
+  `Contents/Library/LaunchDaemons/`. `BundleProgram = Contents/MacOS/OncillascopeHelper`,
+  `MachServices` + `Label` = the service name, `AssociatedBundleIdentifiers` = the app,
+  `UserName = root`. **On-demand** (no `RunAtLoad`/`KeepAlive`): launchd starts it when a
+  message hits the mach service, so there's no idle root process.
+- `App/Oncillascope/HelperManager.swift` — app side. `SMAppService.daemon(plistName:)` for
+  `register()`/`unregister()`/status; `openSystemSettingsLoginItems()`; and the XPC client
+  (`NSXPCConnection(machServiceName:options:.privileged)` + `setCodeSigningRequirement`)
+  that backs `WdutilRunner.Strategy.helper(invoke:)`. A once-guard wraps the continuation
+  (reply vs. error-handler race).
+- Integration: `AppModel` mirrors `helperStatus`; `refreshWdutil()` uses the helper when
+  approved else the AppleScript prompt; `tick()` refreshes wdutil every cycle when approved.
+  UI: `DegradedModeBanner` branches on `helperStatus` (Enable / Approve / one-shot), and
+  `View ▸ Enable Continuous PHY Metrics` (`HelperMenu` in `OncillascopeApp.swift`).
+
+**pbxproj wiring (hand-crafted, objectVersion 77).** New UUIDs `EA…0040–0056`: the helper
+native target + its Debug/Release configs (`CREATE_INFOPLIST_SECTION_IN_BINARY=YES` so the
+tool carries a bundle id for the codesign `identifier` requirement; `ENABLE_HARDENED_RUNTIME`,
+`SKIP_INSTALL`), a `PBXTargetDependency` (app → helper), and two `PBXCopyFilesBuildPhase`s in
+the app target: **Embed Helper Daemon** (`dstSubfolderSpec=6` Executables, `CodeSignOnCopy`)
+and **Embed Launch Daemon plist** (`dstSubfolderSpec=1` Wrapper, `Contents/Library/LaunchDaemons`).
+Build/sign with the same SIGNING.md recipe — the command-line signing overrides apply to
+both targets. Verified: `codesign --verify --deep --strict` validates the embedded helper,
+both binaries carry team `4Z539UE4TT`, `spctl` accepts as Developer ID.
+
 ## What comes next
 
-1. **SMAppService privileged helper (top priority — discussed, not built).** Replaces the
-   per-session admin password prompt with a one-time approval (System Settings ▸ Login Items
-   & Extensions) + XPC, and unlocks **continuous live PHY metrics** (currently one-shot to
-   avoid re-prompting). Now feasible because the Developer ID cert exists. Work: a second
-   (helper) target running as root, a shared XPC protocol, the daemon launchd plist embedded
-   in the bundle, app-side `SMAppService.daemon(...).register()`, an XPC client, and pbxproj
-   wiring for the second target. Must stay signed/notarized; can't be verified under ad-hoc
-   signing. The `WdutilRunner.Strategy.helper(invoke:)` hook is the intended integration point.
+1. **SMAppService privileged helper — BUILT, needs interactive verification + notarization.**
+   Replaces the per-session admin prompt with a one-time approval (System Settings ▸ Login
+   Items & Extensions) + XPC, and unlocks **continuous live PHY metrics** (the tick loop now
+   refreshes wdutil every cycle when the helper is approved; otherwise it stays one-shot via
+   the AppleScript fallback). Implementation (see "Privileged helper" section below).
+   **Remaining:** notarize the new build, install to `/Applications`, launch, click *Enable
+   Helper* (or View menu ▸ *Enable Continuous PHY Metrics*), approve in System Settings, and
+   confirm PHY metrics flow with no password prompt. This can't be exercised under ad-hoc
+   signing and the approval step is interactive, so it was not done here.
 2. **Optional polish:** a simplified 16px icon variant (current art is busy at menu-bar size);
    Sparkle auto-update; CI to build+notarize on tag.
 3. **Housekeeping:** decide whether to push the repo to `DavidsonCollege` org; rotate the
