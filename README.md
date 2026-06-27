@@ -10,8 +10,10 @@ The defining feature is **completeness**: Oncillascope fuses every available dat
 CoreWLAN (identity, live stats, scan, raw IEs), parsed `wdutil info` (PHY-layer metrics),
 and a pure-Swift 802.11 Information Element parser — into one view.
 
-> **Status:** v1.0 foundation. The full core (parsing, fusion, telemetry, export) is
-> implemented and unit-tested; the SwiftUI app builds and runs on macOS 14–26.
+> **Status:** v1.0. The full core (parsing, fusion, telemetry, export) is implemented and
+> unit-tested (34/34); the SwiftUI app builds and runs on macOS 14–26 and ships **signed +
+> notarized** under Developer ID. An optional **privileged helper** (SMAppService) enables
+> prompt-free, continuous PHY metrics.
 
 ---
 
@@ -23,6 +25,8 @@ and a pure-Swift 802.11 Information Element parser — into one view.
   **max-theoretical-rate vs actual** efficiency indicator.
 - **Live time-series charts** — RSSI, noise, SNR, Tx rate, MCS, CCA over a selectable
   1/5/15/60-min window, with automatic markers on **roam** (BSSID change) and channel change.
+  PHY-layer series (MCS / CCA) refresh **continuously** when the optional privileged helper
+  is enabled (see below); otherwise they update one-shot per manual refresh.
 - **Nearby-networks table** — one row per BSS with sort, free-text + structured filters
   (band, generation, min RSSI), and **group-by-SSID** to collapse multi-BSSID APs.
   Channel utilization and station count come from the **BSS Load** IE.
@@ -43,7 +47,7 @@ constraints, not against them:
 | Constraint | How Oncillascope handles it |
 |---|---|
 | The `airport` CLI was removed (macOS 14.4+). | Never used. |
-| `wdutil` needs `sudo` for every option. | One up-front admin auth; clearly degraded if declined. |
+| `wdutil` needs `sudo` for every option. | Either a one-time **privileged-helper** approval (no more prompts; enables continuous metrics) or a per-session admin auth; clearly degraded if both are declined. |
 | CoreWLAN can't return MCS / NSS / guard interval. | Those come **only** from parsing `wdutil info`. |
 | Real BSSIDs require a signed app **+** Location Services. | Signing + a clear Location prompt; otherwise honest degraded-mode messaging. |
 | `wdutil` redacts SSID/BSSID/MAC. | Treated as a PHY-metrics source only; identity comes from CoreWLAN. |
@@ -51,6 +55,25 @@ constraints, not against them:
 
 If Location is denied or admin auth is declined, Oncillascope **tells you exactly which
 fields are redacted and why**, and offers a one-click path to fix it — never silent blanks.
+
+---
+
+## Privileged helper (continuous PHY metrics)
+
+PHY-layer metrics (MCS / NSS / guard interval / CCA) can only come from `wdutil`, which
+requires root. Rather than prompt for an admin password every time, Oncillascope ships an
+optional **SMAppService privileged helper** (`OncillascopeHelper`):
+
+- A one-time approval in **System Settings ▸ Login Items & Extensions** registers an
+  on-demand root daemon (no idle root process — launchd starts it only when needed).
+- The app talks to it over **XPC**, with both sides enforcing a code-signing requirement
+  (same Team ID, genuine signature) — the helper exposes exactly one operation
+  (`wdutil info`) and nothing else.
+- Once approved, PHY metrics refresh **every tick with no further prompts**, powering the
+  continuous MCS / CCA charts. Without it, the app falls back to a per-session in-process
+  admin prompt (attributed to Oncillascope) for one-shot metrics.
+
+Enable it from the degraded-mode banner or **View ▸ Enable Continuous PHY Metrics**.
 
 ---
 
@@ -67,6 +90,10 @@ a thin SwiftUI app (`App/`) sits on top.
 | `OUIResolver` | Offline, privacy-preserving BSSID → vendor lookup. |
 | `Telemetry` | Bounded ring buffers + CSV/JSON export + roam/channel markers. |
 | `WiFiCore` | CoreWLAN + CoreLocation wrapper; fuses all three data sources. |
+
+On top sits the SwiftUI app (`App/Oncillascope/`) plus the optional root XPC daemon
+(`App/OncillascopeHelper/`), which share a single `HelperProtocol.swift` compiled into both
+targets so the XPC contract stays in lockstep.
 
 No third-party runtime dependencies. No telemetry, no network calls (OUI lookups are
 fully local).
@@ -91,8 +118,10 @@ xcodebuild -scheme Oncillascope -configuration Debug build
 ```
 
 A plain build is **ad-hoc signed** and runs in clearly-labeled degraded mode (BSSIDs may
-be redacted). For un-redacted scan data you need a real signature + Location Services —
-see [`SIGNING.md`](SIGNING.md).
+be redacted). For un-redacted scan data you need a real signature + Location Services, and
+the privileged helper requires a Developer ID signature + notarization — see
+[`SIGNING.md`](SIGNING.md). Always build with `-scheme Oncillascope` (not `-target`); the
+signed Release recipe builds and embeds the `OncillascopeHelper` daemon automatically.
 
 **Requirements:** macOS 14 (Sonoma) or later; Xcode 16+. Verified building on macOS 26
 (Tahoe) with Xcode 26 on Apple Silicon. Release builds a universal (arm64 + x86_64) binary.
