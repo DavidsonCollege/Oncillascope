@@ -17,7 +17,8 @@ struct IEInspectorView: View {
                         .font(.callout).foregroundStyle(.secondary)
                 } else {
                     ForEach(network.rawIEs) { ie in
-                        IERow(ie: ie, help: Help.ieDescription(elementID: ie.elementID, extID: ie.extensionID))
+                        IERow(ie: ie, help: Help.ieDescription(elementID: ie.elementID, extID: ie.extensionID)
+                            .resolved(plain: plainEnglish))
                     }
                 }
             }

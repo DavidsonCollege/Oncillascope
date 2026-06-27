@@ -234,38 +234,89 @@ enum Help {
         How many devices are currently connected to this access point. They all share the same airtime.
         """)
 
-    /// Accurate one-line description of an 802.11 Information Element, for the IE tree.
-    static func ieDescription(elementID: Int, extID: Int?) -> String {
+    /// Description of an 802.11 Information Element for the IE tree, in both registers
+    /// (technical and plain-English) so it honors the Plain-English Tooltips toggle.
+    static func ieDescription(elementID: Int, extID: Int?) -> Entry {
         if elementID == 255 {
             switch extID {
-            case 35: return "802.11ax (Wi-Fi 6) capabilities: OFDMA, up to 1024-QAM, 160 MHz, BSS coloring, and target wake time."
-            case 36: return "802.11ax operating parameters, including BSS color and (where present) 6 GHz operation info."
-            case 106, 108: return "802.11be (Wi-Fi 7): up to 320 MHz channels, 4096-QAM, and multi-link operation."
-            case 59: return "HE 6 GHz band capabilities — parameters specific to operating in the 6 GHz band."
-            default: return "An 802.11 extension element (newer-generation capability/operation data)."
+            case 35: return Entry(
+                technical: "802.11ax (Wi-Fi 6) capabilities: OFDMA, up to 1024-QAM, 160 MHz, BSS coloring, and target wake time.",
+                plain: "Wi-Fi 6 features this network supports — faster modes and better handling of many devices at once.")
+            case 36: return Entry(
+                technical: "802.11ax operating parameters, including BSS color and (where present) 6 GHz operation info.",
+                plain: "Wi-Fi 6 operating settings for this network.")
+            case 106, 108: return Entry(
+                technical: "802.11be (Wi-Fi 7): up to 320 MHz channels, 4096-QAM, and multi-link operation.",
+                plain: "Wi-Fi 7 features — the newest, fastest modes.")
+            case 59: return Entry(
+                technical: "HE 6 GHz band capabilities — parameters specific to operating in the 6 GHz band.",
+                plain: "Settings for using the 6 GHz band (Wi-Fi 6E).")
+            default: return Entry(
+                technical: "An 802.11 extension element (newer-generation capability/operation data).",
+                plain: "Newer-generation Wi-Fi capability data.")
             }
         }
         switch elementID {
-        case 0:     return "The network name (SSID). An empty value means a hidden or wildcard (broadcast) network."
-        case 1, 50: return "The data rates this BSS supports, in Mb/s; rates flagged 'basic' are mandatory to join. (High-throughput rates live in the HT/VHT/HE elements instead.)"
-        case 3:     return "DS Parameter Set — the BSS's primary 20 MHz channel number, the anchor clients tune to."
-        case 5:     return "TIM (Traffic Indication Map) — a power-save bitmap flagging which sleeping clients have buffered frames, and (as a DTIM) when buffered broadcast/multicast will be sent."
-        case 7:     return "Country (802.11d) — the regulatory domain: country code plus, per channel sub-band, the allowed channels and maximum transmit power in dBm."
-        case 11:    return "BSS Load (QBSS) — AP-reported load: associated-station count, channel-busy utilization, and remaining admission capacity for QoS traffic."
-        case 32:    return "Power Constraint (802.11h) — a local reduction (dB) below the regulatory maximum transmit power for this channel, so clients lower their power to match (5 GHz)."
-        case 35:    return "TPC Report (802.11h Transmit Power Control) — the transmit power used for this frame and the link margin (signal headroom above what's needed)."
-        case 42:    return "ERP Information — 802.11g compatibility flags, e.g. whether legacy 802.11b stations are present."
-        case 45:    return "HT Capabilities (802.11n / Wi-Fi 4) — supported MCS rates, 20/40 MHz width, spatial streams, and short guard interval."
-        case 48:    return "RSN — the Robust Security Network element: the encryption ciphers and authentication (AKM) suites offered. This is where WPA2 vs WPA3 (SAE) is advertised."
-        case 61:    return "HT Operation (802.11n) — primary channel and secondary-channel offset (whether 40 MHz bonding is active)."
-        case 70:    return "RM Enabled Capabilities (802.11k) — radio-measurement support, e.g. the AP can hand out neighbor-AP lists to help clients roam."
-        case 127:   return "Extended Capabilities — a bitmap advertising optional features such as 802.11v BSS Transition Management (assisted roaming)."
-        case 191:   return "VHT Capabilities (802.11ac / Wi-Fi 5) — up to 160 MHz width, 256-QAM, spatial streams, and MU-MIMO support."
-        case 192:   return "VHT Operation (802.11ac) — the operating channel width and center-frequency segment(s) in use."
-        case 195:   return "VHT Transmit Power Envelope — per-bandwidth maximum transmit-power limits."
-        case 201:   return "Reduced Neighbor Report — compact info about the AP's other-band radios (e.g. its 6 GHz BSS), aiding fast discovery."
-        case 221:   return "Vendor Specific — vendor-defined data keyed by an OUI: e.g. WMM/WME QoS, WPS, or manufacturer extensions beyond the standard elements."
-        default:    return "An 802.11 information element broadcast in this network's beacon / probe response."
+        case 0: return Entry(
+            technical: "The network name (SSID). An empty value means a hidden or wildcard (broadcast) network.",
+            plain: "The network's name. Blank means it's a hidden network.")
+        case 1, 50: return Entry(
+            technical: "The data rates this BSS supports, in Mb/s; rates flagged 'basic' are mandatory to join. (High-throughput rates live in the HT/VHT/HE elements instead.)",
+            plain: "The connection speeds this network supports.")
+        case 3: return Entry(
+            technical: "DS Parameter Set — the BSS's primary 20 MHz channel number, the anchor clients tune to.",
+            plain: "The main channel this network sits on.")
+        case 5: return Entry(
+            technical: "TIM (Traffic Indication Map) — a power-save bitmap flagging which sleeping clients have buffered frames, and (as a DTIM) when buffered broadcast/multicast will be sent.",
+            plain: "A power-saving signal that tells sleeping devices when data is waiting for them.")
+        case 7: return Entry(
+            technical: "Country (802.11d) — the regulatory domain: country code plus, per channel sub-band, the allowed channels and maximum transmit power in dBm.",
+            plain: "The country/region the network is set for, and the channels and power limits allowed there.")
+        case 11: return Entry(
+            technical: "BSS Load (QBSS) — AP-reported load: associated-station count, channel-busy utilization, and remaining admission capacity for QoS traffic.",
+            plain: "How busy the network is: how many devices are connected and how congested the channel is.")
+        case 32: return Entry(
+            technical: "Power Constraint (802.11h) — a local reduction (dB) below the regulatory maximum transmit power for this channel, so clients lower their power to match (5 GHz).",
+            plain: "Tells devices to turn their transmit power down a bit to follow local rules (5 GHz).")
+        case 35: return Entry(
+            technical: "TPC Report (802.11h Transmit Power Control) — the transmit power used for this frame and the link margin (signal headroom above what's needed).",
+            plain: "Reports the transmit power in use and how much signal headroom the link has.")
+        case 42: return Entry(
+            technical: "ERP Information — 802.11g compatibility flags, e.g. whether legacy 802.11b stations are present.",
+            plain: "Compatibility info for older devices on a 2.4 GHz network.")
+        case 45: return Entry(
+            technical: "HT Capabilities (802.11n / Wi-Fi 4) — supported MCS rates, 20/40 MHz width, spatial streams, and short guard interval.",
+            plain: "Wi-Fi 4 features: speeds, channel width, and antenna streams.")
+        case 48: return Entry(
+            technical: "RSN — the Robust Security Network element: the encryption ciphers and authentication (AKM) suites offered. This is where WPA2 vs WPA3 (SAE) is advertised.",
+            plain: "The network's security — which encryption it uses (this is where WPA2 vs WPA3 shows up).")
+        case 61: return Entry(
+            technical: "HT Operation (802.11n) — primary channel and secondary-channel offset (whether 40 MHz bonding is active).",
+            plain: "Wi-Fi 4 channel settings (whether it bonds two channels for more speed).")
+        case 70: return Entry(
+            technical: "RM Enabled Capabilities (802.11k) — radio-measurement support, e.g. the AP can hand out neighbor-AP lists to help clients roam.",
+            plain: "Support for features that help your device roam smoothly between access points.")
+        case 127: return Entry(
+            technical: "Extended Capabilities — a bitmap advertising optional features such as 802.11v BSS Transition Management (assisted roaming).",
+            plain: "A list of extra optional features the network supports, like assisted roaming.")
+        case 191: return Entry(
+            technical: "VHT Capabilities (802.11ac / Wi-Fi 5) — up to 160 MHz width, 256-QAM, spatial streams, and MU-MIMO support.",
+            plain: "Wi-Fi 5 features: wider channels, faster modulation, and serving several devices at once.")
+        case 192: return Entry(
+            technical: "VHT Operation (802.11ac) — the operating channel width and center-frequency segment(s) in use.",
+            plain: "Wi-Fi 5 channel-width settings.")
+        case 195: return Entry(
+            technical: "VHT Transmit Power Envelope — per-bandwidth maximum transmit-power limits.",
+            plain: "Maximum transmit-power limits for each channel width.")
+        case 201: return Entry(
+            technical: "Reduced Neighbor Report — compact info about the AP's other-band radios (e.g. its 6 GHz BSS), aiding fast discovery.",
+            plain: "A heads-up about the access point's other-band radios (like its 6 GHz network) so devices find them faster.")
+        case 221: return Entry(
+            technical: "Vendor Specific — vendor-defined data keyed by an OUI: e.g. WMM/WME QoS, WPS, or manufacturer extensions beyond the standard elements.",
+            plain: "Extra maker-specific data — things like QoS (WMM), WPS setup, or vendor extras beyond the standard.")
+        default: return Entry(
+            technical: "An 802.11 information element broadcast in this network's beacon / probe response.",
+            plain: "A piece of info the network broadcasts about itself.")
         }
     }
 }
