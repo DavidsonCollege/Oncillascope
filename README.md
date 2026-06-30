@@ -4,7 +4,7 @@ A free, open-source macOS app that surfaces **as much RF / Wi-Fi detail as the n
 Apple wireless adapter and its system APIs allow** — for the current connection and for
 all visible nearby networks. It aims to match or exceed paid tools (WiFi Explorer Pro,
 WiFi Signal) while staying inside what Apple permits on stock hardware: no external USB
-radios, no kernel extensions, no monitor mode.
+radios, no kernel extensions, and no disruptive monitor-mode capture in the default flow.
 
 The defining feature is **completeness**: Oncillascope fuses every available data source —
 CoreWLAN (identity, live stats, scan, raw IEs), parsed `wdutil info` (PHY-layer metrics),
@@ -51,7 +51,7 @@ constraints, not against them:
 | CoreWLAN can't return MCS / NSS / guard interval. | Those come **only** from parsing `wdutil info`. |
 | Real BSSIDs require a signed app **+** Location Services. | Signing + a clear Location prompt; otherwise honest degraded-mode messaging. |
 | `wdutil` redacts SSID/BSSID/MAC. | Treated as a PHY-metrics source only; identity comes from CoreWLAN. |
-| No monitor mode on the built-in adapter. | No packet capture / sniffing / true spectrum analysis. Channel "utilization" is read from the **BSS Load IE** only. |
+| Monitor mode *is* available on the built-in adapter, but it disassociates Wi-Fi and needs root + channel hopping. | The default scan is non-disruptive (CoreWLAN active scan); channel "utilization" comes from the **BSS Load IE**. A passive/monitor-mode scan is feasible future work — see [`PASSIVE-SCAN.md`](PASSIVE-SCAN.md). |
 
 If Location is denied or admin auth is declined, Oncillascope **tells you exactly which
 fields are redacted and why**, and offers a one-click path to fix it — never silent blanks.
@@ -130,9 +130,12 @@ signed Release recipe builds and embeds the `OncillascopeHelper` daemon automati
 
 ## Out of scope / known limitations
 
-- **No monitor-mode packet capture, no traffic sniffing, no true spectrum analysis** —
-  the built-in adapter doesn't allow it. Channel "utilization" is read from the BSS Load
-  IE only.
+- **No passive/monitor-mode capture in the current build** — not because the adapter
+  forbids it (monitor mode + radiotap *do* work on the built-in card; confirmed in
+  [`PASSIVE-SCAN.md`](PASSIVE-SCAN.md)) but because it disassociates Wi-Fi and needs root +
+  channel hopping, so it's deferred to an explicit future mode. Channel "utilization" is
+  read from the BSS Load IE only. **External spectrum analyzers and AirPcap-style hardware
+  remain genuinely out of scope.**
 - **No external USB-adapter support.**
 - Identity fields (SSID/BSSID) depend on signing + Location Services. The degraded-mode
   messaging exists so you always know *why* something is redacted.

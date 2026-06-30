@@ -11,6 +11,8 @@ struct IEInspectorView: View {
             VStack(alignment: .leading, spacing: 14) {
                 summary
                 Divider()
+                AnnotationEditor(network: network).id(network.id)
+                Divider()
                 Text("Information Elements").font(.headline)
                 if network.rawIEs.isEmpty {
                     Text("No raw IE data (CoreWLAN returned none for this BSS).")
@@ -68,6 +70,38 @@ struct IEInspectorView: View {
         }
         .font(.callout)
         .help(help.resolved(plain: plainEnglish))
+    }
+}
+
+/// Editable color + note for a network (parity with WiFi Explorer annotations).
+/// Keyed by `network.id` from the caller (`.id(...)`) so its local note state resets
+/// when the selection changes.
+private struct AnnotationEditor: View {
+    let network: BSSObservation
+    @EnvironmentObject var annotations: AnnotationStore
+    @State private var note = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Annotation").font(.headline)
+            HStack {
+                Text("Color").foregroundStyle(.secondary)
+                    .frame(width: 130, alignment: .leading)
+                ColorPickerRow(id: network.id, ssid: network.ssid, bssid: network.bssid)
+            }
+            .font(.callout)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Note").font(.callout).foregroundStyle(.secondary)
+                TextField("Add a note for this network", text: $note, axis: .vertical)
+                    .textFieldStyle(.roundedBorder)
+                    .lineLimit(2...5)
+                    .onChange(of: note) { _, newValue in
+                        annotations.setNote(newValue, for: network.id,
+                                            ssid: network.ssid, bssid: network.bssid)
+                    }
+            }
+        }
+        .onAppear { note = annotations.annotation(for: network.id).note }
     }
 }
 

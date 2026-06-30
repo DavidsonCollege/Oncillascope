@@ -34,11 +34,13 @@ private struct HelperMenu: View {
 @main
 struct OncillascopeApp: App {
     @StateObject private var model = AppModel()
+    @StateObject private var annotations = AnnotationStore()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(model)
+                .environmentObject(annotations)
                 // Set ideal size only (no minimum — a min frame collapses the split
                 // view). This makes the window open at ~1100x720 instead of adopting
                 // the content's runaway ideal height, while staying freely resizable.
@@ -61,6 +63,8 @@ struct OncillascopeApp: App {
                 Button("Export Networks as CSV…") { model.exportNetworksCSV() }
                 Button("Export Telemetry as CSV…") { model.exportTelemetryCSV() }
                 Button("Export Snapshot as JSON…") { model.exportSnapshotJSON() }
+                Button("Export Annotations as CSV…") { annotations.exportAnnotationsCSV() }
+                    .disabled(annotations.items.isEmpty)
             }
         }
     }

@@ -112,6 +112,12 @@ on every dashboard + inspector reading and every 802.11 IE, with a **View ▸ Pl
 Tooltips** menu toggle (`@AppStorage` key `plainEnglishTooltips`) switching technical↔plain
 (see `Help` enum in `App/Oncillascope/UIHelpers.swift`). Tx Power shown in mW + dBm.
 Degraded-mode banners explain redaction; "Grant Access" opens Location Services settings.
+**Per-network annotations** (parity with WiFi Explorer): a named color palette + free-text
+note per BSS, persisted in UserDefaults (`AnnotationStore`, key `networkAnnotations`, keyed
+by `BSSObservation.id`). Swatch + note glyph live in the SSID table cell (Table's 10-column
+builder cap blocks adding columns — `Group` can't mix sortable/non-sortable columns); editor
+is in the IE inspector; "Export Annotations as CSV…" in the File menu. See
+`App/Oncillascope/Annotations.swift`.
 
 ## Privileged helper (SMAppService)
 
@@ -163,9 +169,18 @@ both binaries carry team `4Z539UE4TT`, `spctl` accepts as Developer ID.
    *Enable Helper* (or View menu ▸ *Enable Continuous PHY Metrics*), approve in System
    Settings ▸ Login Items & Extensions, and confirm PHY metrics flow with no password prompt.
    The build is notarized; only the GUI approval step is left.
-2. **Optional polish:** a simplified 16px icon variant (current art is busy at menu-bar size);
+2. **Passive / monitor-mode scan (biggest WiFi Explorer *Pro* parity gap).** Spike done —
+   see `PASSIVE-SCAN.md`. Monitor mode + radiotap **confirmed working on en0** (Mac14,2,
+   macOS 26.5.1); the old "no monitor mode on the built-in adapter" claim was wrong and is
+   now corrected in README. Live capture got 0 frames because the radio parks on a silent
+   channel after disassociation ⇒ **channel steering via `CWInterface.setWLANChannel` is
+   mandatory**, and the scan must be a modal mode that reconnects afterward. Would unlock
+   hidden SSIDs + measured airtime; reuses `IEParser`. Next: prototype radiotap + 802.11
+   MAC-header parsing against a captured pcap, then a `PassiveCapture` module + helper
+   capture op.
+3. **Optional polish:** a simplified 16px icon variant (current art is busy at menu-bar size);
    Sparkle auto-update; CI to build+notarize on tag.
-3. **Housekeeping:** decide whether to push the repo to `DavidsonCollege` org; rotate the
+4. **Housekeeping:** decide whether to push the repo to `DavidsonCollege` org; rotate the
    leaked app-specific password.
 
 ## Environment
