@@ -3,6 +3,7 @@ import WiFiModel
 
 struct NetworksView: View {
     @EnvironmentObject var model: AppModel
+    @EnvironmentObject var annotations: AnnotationStore
 
     @State private var search = ""
     @State private var bandFilter: Band? = nil
@@ -106,8 +107,21 @@ struct NetworksView: View {
     // MARK: - Table
 
     private var table: some View {
+        // Table caps the builder at 10 columns, so the swatch + note indicator live
+        // inside the SSID cell rather than as standalone columns.
         Table(filtered.sorted(using: sortOrder), selection: $selection, sortOrder: $sortOrder) {
-            TableColumn("SSID") { Text($0.ssid?.isEmpty == false ? $0.ssid! : "<hidden>") }
+            TableColumn("SSID") { n in
+                HStack(spacing: 6) {
+                    ColorSwatchMenu(id: n.id, ssid: n.ssid, bssid: n.bssid)
+                    Text(n.ssid?.isEmpty == false ? n.ssid! : "<hidden>")
+                        .foregroundStyle(annotations.color(for: n.id).color ?? .primary)
+                    let note = annotations.annotation(for: n.id).note
+                    if !note.isEmpty {
+                        Image(systemName: "note.text")
+                            .font(.caption2).foregroundStyle(.secondary).help(note)
+                    }
+                }
+            }
             TableColumn("BSSID") { Text(redact($0.bssid)).font(.system(.body, design: .monospaced)) }
             TableColumn("Vendor") { Text($0.vendor ?? "—") }
             TableColumn("Band") { Badge(text: $0.channel.band.rawValue, color: $0.channel.band.tint) }
@@ -137,6 +151,7 @@ struct NetworksView: View {
                 SwiftUI.Section(header: Text("\(name)  ·  \(members.count) BSS")) {
                     ForEach(members) { n in
                         HStack {
+                            ColorSwatchMenu(id: n.id, ssid: n.ssid, bssid: n.bssid)
                             Text(redact(n.bssid)).font(.system(.body, design: .monospaced))
                             Badge(text: n.channel.label, color: n.channel.band.tint)
                             Badge(text: n.phyGeneration.standardLabel, color: n.phyGeneration.badgeColor)
