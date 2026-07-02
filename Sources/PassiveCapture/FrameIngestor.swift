@@ -20,8 +20,8 @@ public enum FrameIngestor {
         let dot11 = Array(raw[rt.headerLength...])
         guard let header = Dot11FrameParser.parse(dot11) else { return nil }
 
-        let channel = rt.frequencyMHz.flatMap(channelNumber(forFrequencyMHz:))
-        let bnd = rt.frequencyMHz.flatMap(band(forFrequencyMHz:)) ?? .unknown
+        let channel = rt.frequencyMHz.flatMap(ChannelMapping.channelNumber(forFrequencyMHz:))
+        let bnd = rt.frequencyMHz.flatMap(ChannelMapping.band(forFrequencyMHz:)) ?? .unknown
 
         var ies: ParsedIEs?
         if let r = header.taggedBodyRange, r.lowerBound <= dot11.count {

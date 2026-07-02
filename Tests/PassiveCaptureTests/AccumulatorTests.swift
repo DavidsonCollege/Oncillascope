@@ -26,14 +26,14 @@ final class AccumulatorTests: XCTestCase {
 
     func testAirtimeMath() {
         // 1000 bytes at 6 Mbps = 8000 bits / 6 = 1333.33 µs.
-        XCTAssertEqual(frameAirtimeMicroseconds(bytes: 1000, rateMbps: 6), 8000.0/6.0, accuracy: 0.01)
+        XCTAssertEqual(Airtime.microseconds(bytes: 1000, rateMbps: 6), 8000.0/6.0, accuracy: 0.01)
     }
 
     func testAirtimeUtilizationPerChannel() {
         let acc = AirtimeAccumulator()
         let f = ingest(Fixtures.beaconVisible)             // channel 1, 6 Mbps
         acc.ingest(f); acc.ingest(f)
-        let expected = 2 * frameAirtimeMicroseconds(bytes: f.rawLength, rateMbps: 6)
+        let expected = 2 * Airtime.microseconds(bytes: f.rawLength, rateMbps: 6)
         XCTAssertEqual(acc.busyMicroseconds(channel: 1), expected, accuracy: 0.01)
         // Over a 1-second window: fraction = busyMicros / 1_000_000.
         XCTAssertEqual(acc.utilization(channel: 1, elapsedSeconds: 1.0),
@@ -57,5 +57,11 @@ final class AccumulatorTests: XCTestCase {
         XCTAssertEqual(s?.total, 2)
         XCTAssertEqual(s?.retries, 1)
         XCTAssertEqual(s?.rate, 0.5)
+    }
+
+    func testRetryIgnoresControlFrames() {
+        let acc = RetryAccumulator()
+        acc.ingest(ingest(Fixtures.controlFrame))
+        XCTAssertNil(acc.stat(bssid: "DE:AD:BE:EF:00:00"))
     }
 }

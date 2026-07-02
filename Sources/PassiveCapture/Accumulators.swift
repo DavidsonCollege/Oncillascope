@@ -2,10 +2,12 @@ import Foundation
 
 // MARK: - Airtime helper
 
-/// Approximate on-air time of a frame: bits / Mbps == microseconds (Mbps = bits/µs).
-public func frameAirtimeMicroseconds(bytes: Int, rateMbps: Double) -> Double {
-    guard rateMbps > 0 else { return 0 }
-    return Double(bytes * 8) / rateMbps
+public enum Airtime {
+    /// Approximate on-air time of a frame: bits / Mbps == microseconds (Mbps = bits/µs).
+    public static func microseconds(bytes: Int, rateMbps: Double) -> Double {
+        guard rateMbps > 0 else { return 0 }
+        return Double(bytes * 8) / rateMbps
+    }
 }
 
 // MARK: - BSS accumulator (hidden SSID resolution)
@@ -51,7 +53,7 @@ public final class AirtimeAccumulator {
 
     public func ingest(_ f: CapturedFrame) {
         guard let ch = f.channel, let rate = f.radiotap.rateMbps else { return }
-        busy[ch, default: 0] += frameAirtimeMicroseconds(bytes: f.rawLength, rateMbps: rate)
+        busy[ch, default: 0] += Airtime.microseconds(bytes: f.rawLength, rateMbps: rate)
     }
 
     public func busyMicroseconds(channel: Int) -> Double { busy[channel] ?? 0 }
@@ -106,6 +108,9 @@ public final class RetryAccumulator {
     public init() {}
 
     public func ingest(_ f: CapturedFrame) {
+        // Retry rate is only meaningful for data/management frames; control frames carry
+        // no BSSID in addr3.
+        guard f.header.type == .data || f.header.type == .management else { return }
         guard let bssid = f.header.addr3 else { return }
         totals[bssid, default: 0] += 1
         if f.header.isRetry { retries[bssid, default: 0] += 1 }

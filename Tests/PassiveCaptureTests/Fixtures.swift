@@ -55,6 +55,17 @@ enum Fixtures {
         0x00, 0x04, 0x54, 0x65, 0x73, 0x74, // SSID IE: "Test"
     ]
 
+    /// A control-type frame padded to 24 bytes. Control frames carry no BSSID in addr3;
+    /// used to verify RetryAccumulator ignores non-data/management frames.
+    static let controlFrame: [UInt8] = [
+        0xB4, 0x00,                         // frame control: type = control
+        0x00, 0x00,                         // duration
+        0x00, 0x11, 0x22, 0x33, 0x44, 0x55, // addr1 (RA)
+        0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, // addr2 (TA)
+        0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x00, // bytes 16-21 (NOT a BSSID for control frames)
+        0x00, 0x00,                         // pad to 24 bytes
+    ]
+
     /// Prepend the radiotap header to an 802.11 frame to form a full captured frame.
     static func frame(_ dot11: [UInt8]) -> [UInt8] { radiotapHeader + dot11 }
 

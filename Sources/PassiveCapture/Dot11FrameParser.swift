@@ -1,7 +1,9 @@
 import Foundation
 
+/// The 802.11 frame-control type field (management/control/data), or unknown for reserved values.
 public enum Dot11Type: Equatable, Sendable { case management, control, data, unknown }
 
+/// Parsed fields from an 802.11 MAC header.
 public struct Dot11Header: Equatable, Sendable {
     public var type: Dot11Type
     public var subtype: UInt8
@@ -13,6 +15,7 @@ public struct Dot11Header: Equatable, Sendable {
     public var taggedBodyRange: Range<Int>?
 }
 
+/// Well-known management-frame subtype values.
 public enum Dot11Subtype {
     public static let assocReq: UInt8 = 0, assocResp: UInt8 = 1
     public static let reassocReq: UInt8 = 2, reassocResp: UInt8 = 3
