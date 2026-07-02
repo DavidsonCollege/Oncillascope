@@ -16,6 +16,14 @@ final class AccumulatorTests: XCTestCase {
         XCTAssertEqual(acc.bsses["00:11:22:33:44:55"]?.channel, 1)
     }
 
+    func testFirstSeenNamedIsNotMarkedHiddenResolved() {
+        // A BSS first seen already carrying its name must NOT be flagged as hidden-resolved.
+        let acc = PassiveBSSAccumulator()
+        acc.ingest(ingest(Fixtures.beaconVisible))
+        XCTAssertEqual(acc.bsses["00:11:22:33:44:55"]?.ssid, "Test")
+        XCTAssertEqual(acc.bsses["00:11:22:33:44:55"]?.hiddenResolved, false)
+    }
+
     func testAirtimeMath() {
         // 1000 bytes at 6 Mbps = 8000 bits / 6 = 1333.33 µs.
         XCTAssertEqual(frameAirtimeMicroseconds(bytes: 1000, rateMbps: 6), 8000.0/6.0, accuracy: 0.01)
