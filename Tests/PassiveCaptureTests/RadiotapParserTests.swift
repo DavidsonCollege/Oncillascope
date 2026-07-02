@@ -26,5 +26,25 @@ final class RadiotapParserTests: XCTestCase {
         let info = RadiotapParser.parse(bytes)
         XCTAssertEqual(info?.headerLength, 16)
         XCTAssertNil(info?.signalDBm)   // ran off the end; degraded, no trap
+        XCTAssertNil(info?.frequencyMHz)   // Channel u16 ran past the 10-byte buffer
+        XCTAssertNil(info?.noiseDBm)
+        XCTAssertEqual(info?.rateMbps, 6.0) // Flags+Rate fit before truncation
+    }
+
+    func testSkipsTSFTBeforeReadingFields() {
+        let info = RadiotapParser.parse(Fixtures.radiotapWithTSFT)
+        XCTAssertEqual(info?.headerLength, 24)
+        XCTAssertEqual(info?.frequencyMHz, 2412)
+        XCTAssertEqual(info?.signalDBm, -50)
+        XCTAssertEqual(info?.noiseDBm, -95)
+        XCTAssertEqual(info?.rateMbps, 6.0)
+    }
+
+    func testExtendedPresenceChainSkipsExtraWord() {
+        let info = RadiotapParser.parse(Fixtures.radiotapExtendedPresence)
+        XCTAssertEqual(info?.headerLength, 20)
+        XCTAssertEqual(info?.frequencyMHz, 2412)
+        XCTAssertEqual(info?.signalDBm, -50)
+        XCTAssertEqual(info?.noiseDBm, -95)
     }
 }

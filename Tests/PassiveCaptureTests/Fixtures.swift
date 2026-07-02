@@ -57,4 +57,31 @@ enum Fixtures {
 
     /// Prepend the radiotap header to an 802.11 frame to form a full captured frame.
     static func frame(_ dot11: [UInt8]) -> [UInt8] { radiotapHeader + dot11 }
+
+    /// Radiotap header WITH TSFT (bit 0, 8 bytes, 8-aligned) present before the fields we
+    /// read — proves offsets skip TSFT. present=0x6F (bits 0,1,2,3,5,6), it_len=24.
+    static let radiotapWithTSFT: [UInt8] = [
+        0x00, 0x00, 0x18, 0x00, 0x6F, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // TSFT
+        0x00,       // Flags
+        0x0C,       // Rate (6 Mbps)
+        0x6C, 0x09, // freq 2412
+        0xC0, 0x00, // channel flags
+        0xCE,       // signal -50
+        0xA1,       // noise -95
+    ]
+
+    /// Header with a chained presence word (bit31 in word1, fields described by word2).
+    /// present1=0x80000000 (ext only), present2=0x6E (bits 1,2,3,5,6), it_len=20.
+    static let radiotapExtendedPresence: [UInt8] = [
+        0x00, 0x00, 0x14, 0x00,
+        0x00, 0x00, 0x00, 0x80, // present word 1: ext bit only
+        0x6E, 0x00, 0x00, 0x00, // present word 2: bits 1,2,3,5,6
+        0x00,       // Flags
+        0x0C,       // Rate
+        0x6C, 0x09, // freq 2412
+        0xC0, 0x00, // channel flags
+        0xCE,       // signal -50
+        0xA1,       // noise -95
+    ]
 }
