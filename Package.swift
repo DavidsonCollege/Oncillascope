@@ -12,6 +12,7 @@ let package = Package(
         .library(name: "WdutilBridge", targets: ["WdutilBridge"]),
         .library(name: "OUIResolver", targets: ["OUIResolver"]),
         .library(name: "Telemetry", targets: ["Telemetry"]),
+        .library(name: "PassiveCapture", targets: ["PassiveCapture"]),
         .library(name: "WiFiCore", targets: ["WiFiCore"]),
     ],
     targets: [
@@ -34,6 +35,9 @@ let package = Package(
         // Time-series ring buffers + CSV/JSON export.
         .target(name: "Telemetry", dependencies: ["WiFiModel"]),
 
+        // Pure-Swift decode + derivation for monitor-mode capture (no libpcap/XPC here).
+        .target(name: "PassiveCapture", dependencies: ["WiFiModel", "IEParser"]),
+
         // CoreWLAN + CoreLocation wrapper. macOS frameworks; runtime needs an app context.
         .target(
             name: "WiFiCore",
@@ -44,5 +48,6 @@ let package = Package(
         .testTarget(name: "WdutilBridgeTests", dependencies: ["WdutilBridge", "WiFiModel"]),
         .testTarget(name: "OUIResolverTests", dependencies: ["OUIResolver", "WiFiModel"]),
         .testTarget(name: "TelemetryTests", dependencies: ["Telemetry", "WiFiModel"]),
+        .testTarget(name: "PassiveCaptureTests", dependencies: ["PassiveCapture", "WiFiModel", "IEParser"]),
     ]
 )
