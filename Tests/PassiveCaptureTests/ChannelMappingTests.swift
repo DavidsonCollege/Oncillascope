@@ -19,4 +19,20 @@ final class ChannelMappingTests: XCTestCase {
         XCTAssertNil(channelNumber(forFrequencyMHz: 100))
         XCTAssertNil(band(forFrequencyMHz: 100))
     }
+    func testBoundaries() {
+        XCTAssertEqual(channelNumber(forFrequencyMHz: 2472), 13)
+        XCTAssertEqual(channelNumber(forFrequencyMHz: 2480), nil)   // gap between ch13 and ch14
+        XCTAssertEqual(band(forFrequencyMHz: 2480), nil)
+        XCTAssertEqual(channelNumber(forFrequencyMHz: 5885), 177)
+        XCTAssertEqual(channelNumber(forFrequencyMHz: 5890), nil)
+        XCTAssertEqual(band(forFrequencyMHz: 5890), nil)
+    }
+    func testValidityAgrees() {
+        // channelNumber and band must agree on which frequencies are valid.
+        for freq in stride(from: 2400, through: 7200, by: 1) {
+            XCTAssertEqual(channelNumber(forFrequencyMHz: freq) != nil,
+                           band(forFrequencyMHz: freq) != nil,
+                           "disagreement at \(freq) MHz")
+        }
+    }
 }
