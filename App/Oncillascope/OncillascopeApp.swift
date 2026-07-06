@@ -1,5 +1,7 @@
 import SwiftUI
 
+extension Notification.Name { static let showEmailExport = Notification.Name("showEmailExport") }
+
 /// View-menu toggle (⇧⌘E) switching dashboard tooltips between the technical and
 /// plain-English explanations. Backed by @AppStorage so the choice persists and every
 /// tooltip updates live.
@@ -41,6 +43,7 @@ struct OncillascopeApp: App {
             ContentView()
                 .environmentObject(model)
                 .environmentObject(annotations)
+                .modifier(EmailExportSheetPresenter())
                 // Set ideal size only (no minimum — a min frame collapses the split
                 // view). This makes the window open at ~1100x720 instead of adopting
                 // the content's runaway ideal height, while staying freely resizable.
@@ -65,6 +68,9 @@ struct OncillascopeApp: App {
                 Button("Export Snapshot as JSON…") { model.exportSnapshotJSON() }
                 Button("Export Annotations as CSV…") { annotations.exportAnnotationsCSV() }
                     .disabled(annotations.items.isEmpty)
+                Button("Email Exports to Helpdesk…") {
+                    NotificationCenter.default.post(name: .showEmailExport, object: nil)
+                }
             }
         }
     }
