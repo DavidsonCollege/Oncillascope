@@ -1,7 +1,5 @@
 import SwiftUI
 
-extension Notification.Name { static let showEmailExport = Notification.Name("showEmailExport") }
-
 /// View-menu toggle (⇧⌘E) switching dashboard tooltips between the technical and
 /// plain-English explanations. Backed by @AppStorage so the choice persists and every
 /// tooltip updates live.
@@ -30,6 +28,14 @@ private struct HelperMenu: View {
             Button("Enable Continuous PHY Metrics…") { model.enableHelper() }
                 .disabled(true)
         }
+    }
+}
+
+private struct EmailExportCommandButton: View {
+    @FocusedValue(\.emailExportAction) private var action
+    var body: some View {
+        Button("Email Exports to Helpdesk…") { action?.trigger() }
+            .disabled(action == nil)
     }
 }
 
@@ -68,9 +74,7 @@ struct OncillascopeApp: App {
                 Button("Export Snapshot as JSON…") { model.exportSnapshotJSON() }
                 Button("Export Annotations as CSV…") { annotations.exportAnnotationsCSV() }
                     .disabled(annotations.items.isEmpty)
-                Button("Email Exports to Helpdesk…") {
-                    NotificationCenter.default.post(name: .showEmailExport, object: nil)
-                }
+                EmailExportCommandButton()
             }
         }
     }

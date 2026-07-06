@@ -62,17 +62,38 @@ struct EmailExportSheet: View {
     private func summary(_ r: EmailComposeResult) -> String {
         var parts: [String] = []
         if !r.skipped.isEmpty { parts.append("Skipped (empty): \(r.skipped.joined(separator: ", "))") }
+        if !r.failed.isEmpty { parts.append("Failed to write: \(r.failed.joined(separator: ", "))") }
         if r.usedFallback { parts.append("No mail client found — opened a blank message and revealed the files in Finder to attach manually.") }
         return parts.joined(separator: "\n")
     }
 }
 
-/// Presents EmailExportSheet when the menu posts `.showEmailExport`.
+/// A focused-scene action: the File-menu command triggers the email sheet on the
+/// frontmost window only. (WindowGroup can have several windows; a global broadcast would
+/// open the sheet on all of them at once.)
+struct EmailExportAction: Equatable {
+    let id: UUID
+    let trigger: () -> Void
+    static func == (lhs: EmailExportAction, rhs: EmailExportAction) -> Bool { lhs.id == rhs.id }
+}
+
+struct EmailExportActionKey: FocusedValueKey { typealias Value = EmailExportAction }
+
+extension FocusedValues {
+    var emailExportAction: EmailExportAction? {
+        get { self[EmailExportActionKey.self] }
+        set { self[EmailExportActionKey.self] = newValue }
+    }
+}
+
+/// Presents EmailExportSheet for this window and publishes the trigger as a focused-scene
+/// value so the menu command reaches only the frontmost window.
 struct EmailExportSheetPresenter: ViewModifier {
     @State private var show = false
+    @State private var actionID = UUID()   // stable per window → no focused-value churn
     func body(content: Content) -> some View {
         content
-            .onReceive(NotificationCenter.default.publisher(for: .showEmailExport)) { _ in show = true }
             .sheet(isPresented: $show) { EmailExportSheet() }
+            .focusedSceneValue(\.emailExportAction, EmailExportAction(id: actionID) { show = true })
     }
 }

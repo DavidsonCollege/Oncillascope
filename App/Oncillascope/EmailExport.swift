@@ -26,7 +26,8 @@ enum ExportKind: String, CaseIterable, Identifiable {
 
 struct EmailComposeResult {
     let attached: [String]
-    let skipped: [String]
+    let skipped: [String]   // selected but had no data (empty)
+    let failed: [String]    // selected, had data, but writing the temp file failed
     let usedFallback: Bool
 }
 
@@ -58,14 +59,14 @@ enum EmailExporter {
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
 
         var urls: [URL] = []
-        var attached: [String] = [], skipped: [String] = []
+        var attached: [String] = [], skipped: [String] = [], failed: [String] = []
         for kind in ExportKind.allCases where kinds.contains(kind) {
             guard let data = data(for: kind, model: model, annotations: annotations) else {
                 skipped.append(kind.displayName); continue
             }
             let url = dir.appendingPathComponent(kind.fileName)
             do { try data.write(to: url); urls.append(url); attached.append(kind.displayName) }
-            catch { skipped.append(kind.displayName) }
+            catch { failed.append(kind.displayName) }
         }
 
         let host = ProcessInfo.processInfo.hostName
@@ -78,7 +79,7 @@ enum EmailExporter {
             service.recipients = [recipient]
             service.subject = subject
             service.perform(withItems: items)
-            return EmailComposeResult(attached: attached, skipped: skipped, usedFallback: false)
+            return EmailComposeResult(attached: attached, skipped: skipped, failed: failed, usedFallback: false)
         }
 
         // Fallback: no Mail client configured. Open a pre-addressed mailto (no attachment)
@@ -88,6 +89,6 @@ enum EmailExporter {
             NSWorkspace.shared.open(mailto)
         }
         if !urls.isEmpty { NSWorkspace.shared.activateFileViewerSelecting(urls) }
-        return EmailComposeResult(attached: attached, skipped: skipped, usedFallback: true)
+        return EmailComposeResult(attached: attached, skipped: skipped, failed: failed, usedFallback: true)
     }
 }
