@@ -13,6 +13,7 @@ let package = Package(
         .library(name: "OUIResolver", targets: ["OUIResolver"]),
         .library(name: "Telemetry", targets: ["Telemetry"]),
         .library(name: "WiFiCore", targets: ["WiFiCore"]),
+        .library(name: "AppUpdateSupport", targets: ["AppUpdateSupport"]),
     ],
     targets: [
         // Pure value types shared across every module (spec §7 data model).
@@ -40,9 +41,13 @@ let package = Package(
             dependencies: ["WiFiModel", "IEParser", "WdutilBridge", "OUIResolver"]
         ),
 
+        // Pure version model shared with the CI appcast pipeline; app-target only usage.
+        .target(name: "AppUpdateSupport"),
+
         .testTarget(name: "IEParserTests", dependencies: ["IEParser", "WiFiModel"]),
         .testTarget(name: "WdutilBridgeTests", dependencies: ["WdutilBridge", "WiFiModel"]),
         .testTarget(name: "OUIResolverTests", dependencies: ["OUIResolver", "WiFiModel"]),
         .testTarget(name: "TelemetryTests", dependencies: ["Telemetry", "WiFiModel"]),
+        .testTarget(name: "AppUpdateSupportTests", dependencies: ["AppUpdateSupport"]),
     ]
 )
