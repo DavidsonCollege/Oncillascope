@@ -2,6 +2,9 @@
 .build/
 .swiftpm/
 Package.resolved
+# ...but DO pin the app's resolved remote dependencies (e.g. Sparkle) so CI
+# release builds are reproducible.
+!App/Oncillascope.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Xcode
 *.xcuserstate
