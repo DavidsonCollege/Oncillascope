@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="design/oncillascope-icon.png" alt="Oncillascope app icon" width="180" height="180">
+</p>
+
 # Oncillascope — native macOS Wi-Fi analyzer
 
 A free, open-source macOS app that surfaces **as much RF / Wi-Fi detail as the native
