@@ -7,9 +7,9 @@
             <pubDate>Tue, 07 Jul 2026 17:21:36 +0000</pubDate>
             <link>https://github.com/DavidsonCollege/Oncillascope/releases</link>
             <sparkle:version>1</sparkle:version>
-            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <sparkle:shortVersionString>0.0.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/DavidsonCollege/Oncillascope/releases/download/v0.0.1/Oncillascope-0.0.1.zip" length="4753758" type="application/octet-stream" sparkle:edSignature="JVzJfGjkIC1ghpzdlBRD4nUQUYYQYvO6d1X/L8N2emsUp4sx99l+w7dbPF1FCzwzYLCEe61SlTQ6TyjmlxCdDw=="/>
+            <enclosure url="https://github.com/DavidsonCollege/Oncillascope/releases/download/v0.0.1/Oncillascope-0.0.1.zip" length="4753785" type="application/octet-stream" sparkle:edSignature="bkKhMfZCx7c8DjuQuZAhwd2FXibA3tZ77wWIJoZtspx6EcXRWILWCPpQrgSwmOvd5tHGD9DiA5f/yN3dh83TCQ=="/>
         </item>
     </channel>
 </rss>
