@@ -127,8 +127,7 @@ existing feed.
 
 ### Steps
 
-1. **Checkout** with full history (`fetch-depth: 0`) so `git rev-list --count HEAD`
-   yields a monotonic build number.
+1. **Checkout** the tagged commit.
 2. **Import signing assets** into a temporary keychain:
    - Developer ID Application cert from secrets `DEVELOPER_ID_P12` (base64 `.p12`) +
      `DEVELOPER_ID_P12_PASSWORD`.
@@ -136,7 +135,11 @@ existing feed.
    - Create + unlock a throwaway keychain; delete on cleanup.
 3. **Version stamping:**
    - `CFBundleShortVersionString` = tag without leading `v` (`1.1.0`).
-   - `CFBundleVersion` = `git rev-list --count HEAD` (monotonically increasing integer).
+   - `CFBundleVersion` = explicit integer derived deterministically from the semver:
+     `MAJOR*10000 + MINOR*100 + PATCH` (e.g. `1.1.0` → `10100`, `1.2.3` → `10203`).
+     Monotonic as long as versions increase, independent of git history, and
+     computed straight from the tag (no manual tracking). Constraint: `MINOR` and
+     `PATCH` stay `< 100`, which is fine for this project's cadence.
    - Applied via `agvtool`/`PlistBuddy`/xcodebuild build settings.
 4. **Build** the Release app with the proven flags from `SIGNING.md`:
    ```
@@ -249,5 +252,6 @@ establishes the baseline; the appcast is seeded on that run.
 - **Runner Xcode version** must be new enough (Xcode 16+) to match the local toolchain; pin it
   in the workflow.
 - **Notarization latency** makes releases take several minutes — acceptable for tag-driven CI.
-- **CFBundleVersion via commit count** assumes linear history on the release branch; if that
-  ever breaks, switch to an explicit build-number input.
+- **CFBundleVersion is derived from the semver** as `MAJOR*10000 + MINOR*100 + PATCH`; this
+  assumes `MINOR`/`PATCH` stay below 100. If the cadence ever exceeds that, widen the
+  multipliers (e.g. `*1000000 + *1000`).
