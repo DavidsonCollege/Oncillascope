@@ -88,7 +88,14 @@ jobs:
           curl -fsSL -o sparkle.tar.xz \
             "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
           tar -xf sparkle.tar.xz
-          echo "SPARKLE_BIN=$RUNNER_TEMP/bin" >> "$GITHUB_ENV"
+          # Locate generate_appcast rather than assuming bin/ is top-level, so a
+          # future SPARKLE_VERSION bump or nested archive layout won't break the run.
+          gen="$(find "$RUNNER_TEMP" -type f -name generate_appcast | head -1)"
+          if [ -z "$gen" ]; then
+            echo "generate_appcast not found after extracting Sparkle tools" >&2
+            exit 1
+          fi
+          echo "SPARKLE_BIN=$(dirname "$gen")" >> "$GITHUB_ENV"
           # No keychain import needed: generate_appcast reads the EdDSA key from
           # ED_KEY_FILE (--ed-key-file) set in the signing-cert step.
 

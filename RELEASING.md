@@ -61,3 +61,16 @@ and passed straight to `generate_appcast` via `--ed-key-file`. To rotate:
 Push a throwaway pre-release tag (e.g. `v0.0.1`) first and confirm the whole chain runs
 green and the feed appears on Pages before cutting a real release. See the manual E2E
 checklist in the auto-update design spec.
+
+### Assertions to confirm on the first release
+
+After the first pipeline run, fetch the published feed and confirm:
+
+```bash
+curl -fsSL https://davidsoncollege.github.io/Oncillascope/appcast.xml | \
+  grep -E 'sparkle:(version|shortVersionString|edSignature|minimumSystemVersion)|<enclosure|releaseNotesLink'
+```
+
+- `sparkle:edSignature` is present and non-empty on the enclosure (EdDSA signing worked).
+- `sparkle:minimumSystemVersion` is `14.0` (generate_appcast derives this from the app's `LSMinimumSystemVersion`; if it is missing, the deployment target or bundle plist is wrong).
+- `sparkle:releaseNotesLink` resolves to the published `release-notes/<version>.html` on Pages (open the URL). If the link is absent or wrong, the release-notes HTML is orphaned — wire `generate_appcast --release-notes-url-prefix https://davidsoncollege.github.io/Oncillascope/release-notes/` in `scripts/make-appcast.sh`.
