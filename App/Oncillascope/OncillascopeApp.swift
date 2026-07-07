@@ -43,6 +43,7 @@ private struct EmailExportCommandButton: View {
 struct OncillascopeApp: App {
     @StateObject private var model = AppModel()
     @StateObject private var annotations = AnnotationStore()
+    @StateObject private var updater = UpdaterController()
 
     var body: some Scene {
         WindowGroup {
@@ -75,6 +76,9 @@ struct OncillascopeApp: App {
                 Button("Export Annotations as CSV…") { annotations.exportAnnotationsCSV() }
                     .disabled(annotations.items.isEmpty)
                 EmailExportCommandButton()
+            }
+            CommandGroup(after: .appInfo) {
+                CheckForUpdatesCommand(updater: updater)
             }
         }
     }
