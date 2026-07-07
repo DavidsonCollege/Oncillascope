@@ -89,11 +89,20 @@ extension FocusedValues {
 /// Presents EmailExportSheet for this window and publishes the trigger as a focused-scene
 /// value so the menu command reaches only the frontmost window.
 struct EmailExportSheetPresenter: ViewModifier {
+    // Sheets presented from a scene-root modifier do NOT reliably inherit @EnvironmentObjects,
+    // so the presenter takes them and re-injects them onto the sheet content — otherwise
+    // EmailExportSheet traps on first access to `model`/`annotations` (the Compose action).
+    let model: AppModel
+    let annotations: AnnotationStore
     @State private var show = false
     @State private var actionID = UUID()   // stable per window → no focused-value churn
     func body(content: Content) -> some View {
         content
-            .sheet(isPresented: $show) { EmailExportSheet() }
+            .sheet(isPresented: $show) {
+                EmailExportSheet()
+                    .environmentObject(model)
+                    .environmentObject(annotations)
+            }
             .focusedSceneValue(\.emailExportAction, EmailExportAction(id: actionID) { show = true })
     }
 }

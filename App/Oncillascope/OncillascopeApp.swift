@@ -43,13 +43,14 @@ private struct EmailExportCommandButton: View {
 struct OncillascopeApp: App {
     @StateObject private var model = AppModel()
     @StateObject private var annotations = AnnotationStore()
+    @StateObject private var updater = UpdaterController()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(model)
                 .environmentObject(annotations)
-                .modifier(EmailExportSheetPresenter())
+                .modifier(EmailExportSheetPresenter(model: model, annotations: annotations))
                 // Set ideal size only (no minimum — a min frame collapses the split
                 // view). This makes the window open at ~1100x720 instead of adopting
                 // the content's runaway ideal height, while staying freely resizable.
@@ -75,6 +76,9 @@ struct OncillascopeApp: App {
                 Button("Export Annotations as CSV…") { annotations.exportAnnotationsCSV() }
                     .disabled(annotations.items.isEmpty)
                 EmailExportCommandButton()
+            }
+            CommandGroup(after: .appInfo) {
+                CheckForUpdatesCommand(updater: updater)
             }
         }
     }

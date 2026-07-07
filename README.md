@@ -95,8 +95,10 @@ On top sits the SwiftUI app (`App/Oncillascope/`) plus the optional root XPC dae
 (`App/OncillascopeHelper/`), which share a single `HelperProtocol.swift` compiled into both
 targets so the XPC contract stays in lockstep.
 
-No third-party runtime dependencies. No telemetry, no network calls (OUI lookups are
-fully local).
+No third-party runtime dependencies in the core (`WiFiAnalyzerKit`); the app shell bundles
+**Sparkle** solely for updates. No telemetry. OUI lookups are fully local. The only network
+activity is the **optional** Sparkle update check against GitHub Releases, which you opt into
+on first launch and can disable anytime in the update dialog.
 
 ---
 
@@ -145,6 +147,18 @@ signed Release recipe builds and embeds the `OncillascopeHelper` daemon automati
   complete vendor coverage (see `Sources/OUIResolver/Resources/oui.csv`).
 
 ---
+
+## Updating
+
+Oncillascope updates itself via [Sparkle](https://sparkle-project.org). On first launch it
+asks whether to check for updates automatically. When a newer signed release is available it
+shows the release notes and an **Install & Relaunch** button — updates are never installed
+silently. You can also trigger a check anytime from **Oncillascope ▸ Check for Updates…**.
+
+Every update is protected by two independent signatures: the app's Developer ID + Apple
+notarization (checked by macOS), and an EdDSA signature on the appcast (checked by Sparkle),
+so a compromised feed host cannot ship a tampered build. Releases and the update feed are
+produced automatically by the CI pipeline described in [`RELEASING.md`](RELEASING.md).
 
 ## License
 

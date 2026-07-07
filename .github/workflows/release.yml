@@ -1,0 +1,202 @@
+name: Release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write   # create releases, push to gh-pages
+
+jobs:
+  release:
+    runs-on: macos-14
+    env:
+      TEAM_ID: "4Z539UE4TT"
+      FEED_APP_NAME: "Oncillascope"
+      SPARKLE_VERSION: "2.6.4"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16+
+        run: |
+          # Select the NEWEST installed Xcode >= 16 rather than assuming a fixed
+          # path (the runner default may be 15.x, and bundle names vary by image).
+          sel="$(for app in /Applications/Xcode*.app; do
+                   [ -d "$app" ] || continue
+                   v="$("$app/Contents/Developer/usr/bin/xcodebuild" -version 2>/dev/null | awk 'NR==1{print $2}')"
+                   [ -n "$v" ] || continue
+                   printf '%s\t%s\n' "$v" "$app"
+                 done | sort -V | awk -F'\t' '($1+0)>=16{last=$2} END{print last}')"
+          if [ -z "$sel" ]; then
+            echo "No Xcode 16+ found on this runner. Installed Xcodes:" >&2
+            ls -d /Applications/Xcode*.app >&2 || true
+            exit 1
+          fi
+          sudo xcode-select -s "$sel"
+          echo "Selected $(xcodebuild -version | head -1) at $sel"
+
+      - name: Derive version numbers from tag
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME}"           # e.g. v1.2.3
+          SHORT="${TAG#v}"                    # 1.2.3
+          IFS='.' read -r MAJ MIN PAT <<< "$SHORT"
+          if [ "$MIN" -ge 100 ] || [ "$PAT" -ge 100 ]; then
+            echo "MINOR/PATCH must be < 100 for the CFBundleVersion scheme" >&2; exit 1
+          fi
+          BUILD=$(( MAJ*10000 + MIN*100 + PAT ))
+          echo "tag=$TAG"        >> "$GITHUB_OUTPUT"
+          echo "short=$SHORT"    >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD"    >> "$GITHUB_OUTPUT"
+
+      - name: Import Developer ID signing cert
+        env:
+          DEVELOPER_ID_P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/build.keychain"
+          KPW="$(uuidgen)"
+          security create-keychain -p "$KPW" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KPW" "$KEYCHAIN"
+          echo "$DEVELOPER_ID_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" \
+            -P "$DEVELOPER_ID_P12_PASSWORD" -T /usr/bin/codesign
+          # WWDR G3 intermediate (see SIGNING.md gotcha). curl -f fails hard on a
+          # download error; the import tolerates "already exists" but fails on any
+          # other error rather than deferring an opaque trust-chain failure to codesign.
+          curl -fsSL -o "$RUNNER_TEMP/wwdr.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
+          if ! wwdr_out="$(security import "$RUNNER_TEMP/wwdr.cer" -k "$KEYCHAIN" 2>&1)"; then
+            if echo "$wwdr_out" | grep -q "already exists"; then
+              echo "WWDR cert already present; continuing."
+            else
+              echo "WWDR cert import failed: $wwdr_out" >&2
+              exit 1
+            fi
+          fi
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KPW" "$KEYCHAIN"
+          rm -f "$RUNNER_TEMP/cert.p12"
+          echo "BUILD_KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
+          # Sparkle EdDSA private key -> a file passed directly to generate_appcast
+          # via --ed-key-file (robust: no keychain import that could silently fail
+          # or, worse, sign with the wrong key). Lives only in ephemeral RUNNER_TEMP.
+          umask 077
+          printf '%s' "$SPARKLE_ED_PRIVATE_KEY" > "$RUNNER_TEMP/sparkle_ed_key"
+          echo "ED_KEY_FILE=$RUNNER_TEMP/sparkle_ed_key" >> "$GITHUB_ENV"
+
+      - name: Fetch Sparkle tools
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o sparkle.tar.xz \
+            "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          tar -xf sparkle.tar.xz
+          # Locate generate_appcast rather than assuming bin/ is top-level, so a
+          # future SPARKLE_VERSION bump or nested archive layout won't break the run.
+          gen="$(find "$RUNNER_TEMP" -type f -name generate_appcast | head -1)"
+          if [ -z "$gen" ]; then
+            echo "generate_appcast not found after extracting Sparkle tools" >&2
+            exit 1
+          fi
+          echo "SPARKLE_BIN=$(dirname "$gen")" >> "$GITHUB_ENV"
+          # No keychain import needed: generate_appcast reads the EdDSA key from
+          # ED_KEY_FILE (--ed-key-file) set in the signing-cert step.
+
+      - name: Build (Release, universal, hardened runtime)
+        run: |
+          xcodebuild -project App/Oncillascope.xcodeproj -scheme Oncillascope -configuration Release -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            OTHER_CODE_SIGN_FLAGS="--timestamp" \
+            CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
+            MARKETING_VERSION="${{ steps.ver.outputs.short }}" \
+            CURRENT_PROJECT_VERSION="${{ steps.ver.outputs.build }}" \
+            build
+
+      - name: Sign embedded Sparkle helpers (hardened runtime + timestamp)
+        run: |
+          # Sparkle.framework ships nested helpers (Updater.app, Autoupdate, the
+          # Downloader/Installer XPC services) that Xcode does NOT re-sign with our
+          # Developer ID + hardened runtime + secure timestamp, so notarization
+          # rejects them. Re-sign inside-out, then re-seal the app.
+          APP="build/Build/Products/Release/Oncillascope.app"
+          FW="$APP/Contents/Frameworks/Sparkle.framework"
+          ID="Developer ID Application"
+          sign() { codesign --force --options runtime --timestamp -s "$ID" "$@"; }
+          for x in "$FW/Versions/B/XPCServices/"*.xpc; do [ -e "$x" ] && sign "$x"; done
+          [ -e "$FW/Versions/B/Autoupdate" ] && sign "$FW/Versions/B/Autoupdate"
+          [ -e "$FW/Versions/B/Updater.app" ] && sign "$FW/Versions/B/Updater.app"
+          sign "$FW"
+          # Re-seal the outer app so its signature covers the re-signed helpers
+          # (preserve entitlements — a bare --force re-sign would strip them).
+          codesign --force --options runtime --timestamp \
+            -s "$ID" --entitlements App/Oncillascope.entitlements "$APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+
+      - name: Notarize + staple
+        env:
+          AC_APPLE_ID: ${{ secrets.AC_APPLE_ID }}
+          AC_TEAM_ID: ${{ secrets.AC_TEAM_ID }}
+          AC_APP_PASSWORD: ${{ secrets.AC_APP_PASSWORD }}
+        run: |
+          APP="build/Build/Products/Release/Oncillascope.app"
+          ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" \
+            --apple-id "$AC_APPLE_ID" --team-id "$AC_TEAM_ID" --password "$AC_APP_PASSWORD" --wait
+          xcrun stapler staple "$APP"
+          xcrun stapler validate "$APP"
+
+      - name: Package distribution zip
+        id: pkg
+        run: |
+          APP="build/Build/Products/Release/Oncillascope.app"
+          ZIP="Oncillascope-${{ steps.ver.outputs.short }}.zip"
+          ditto -c -k --keepParent "$APP" "$ZIP"
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Extract release notes
+        id: notes
+        run: |
+          NOTES="$RUNNER_TEMP/notes.md"
+          # Use the annotated tag message if present, else a default line.
+          git tag -l --format='%(contents)' "${GITHUB_REF_NAME}" > "$NOTES"
+          [ -s "$NOTES" ] || echo "Oncillascope ${{ steps.ver.outputs.short }}" > "$NOTES"
+          echo "path=$NOTES" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release with asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" "${{ steps.pkg.outputs.zip }}" \
+            --title "Oncillascope ${{ steps.ver.outputs.short }}" \
+            --notes-file "${{ steps.notes.outputs.path }}"
+
+      - name: Check out gh-pages worktree
+        run: |
+          git fetch origin gh-pages || true
+          git worktree add "$RUNNER_TEMP/pages" gh-pages 2>/dev/null \
+            || { git worktree add --orphan -b gh-pages "$RUNNER_TEMP/pages"; }
+
+      - name: Regenerate appcast
+        run: |
+          VERSION="${{ steps.ver.outputs.short }}" \
+          TAG="${GITHUB_REF_NAME}" \
+          ZIP_PATH="${{ steps.pkg.outputs.zip }}" \
+          RELEASE_NOTES_MD="${{ steps.notes.outputs.path }}" \
+          SPARKLE_BIN="$SPARKLE_BIN" \
+          ED_KEY_FILE="$ED_KEY_FILE" \
+          DOWNLOAD_URL_PREFIX="https://github.com/DavidsonCollege/Oncillascope/releases/download/${GITHUB_REF_NAME}/" \
+          PAGES_DIR="$RUNNER_TEMP/pages" \
+          bash scripts/make-appcast.sh
+
+      - name: Publish appcast to gh-pages
+        run: |
+          cd "$RUNNER_TEMP/pages"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add appcast.xml release-notes
+          git commit -m "release: appcast for ${GITHUB_REF_NAME}" || echo "no changes"
+          git push origin gh-pages

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EA0000000000000000000062 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000061 /* Sparkle */; };
 		EA0000000000000000000021 /* WiFiCore in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000011 /* WiFiCore */; };
 		EA0000000000000000000022 /* WiFiModel in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000012 /* WiFiModel */; };
 		EA0000000000000000000023 /* IEParser in Frameworks */ = {isa = PBXBuildFile; productRef = EA0000000000000000000013 /* IEParser */; };
@@ -70,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA0000000000000000000062 /* Sparkle in Frameworks */,
 				EA0000000000000000000021 /* WiFiCore in Frameworks */,
 				EA0000000000000000000022 /* WiFiModel in Frameworks */,
 				EA0000000000000000000023 /* IEParser in Frameworks */,
@@ -144,6 +146,7 @@
 			);
 			name = Oncillascope;
 			packageProductDependencies = (
+				EA0000000000000000000061 /* Sparkle */,
 				EA0000000000000000000011 /* WiFiCore */,
 				EA0000000000000000000012 /* WiFiModel */,
 				EA0000000000000000000013 /* IEParser */,
@@ -219,6 +222,7 @@
 			mainGroup = EA0000000000000000000002;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				EA0000000000000000000060 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -440,7 +444,23 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		EA0000000000000000000060 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		EA0000000000000000000061 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA0000000000000000000060 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		EA0000000000000000000011 /* WiFiCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EA0000000000000000000010 /* XCLocalSwiftPackageReference "WiFiAnalyzerKit" */;
