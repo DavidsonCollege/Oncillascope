@@ -18,7 +18,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Select Xcode 16+
-        run: sudo xcode-select -s /Applications/Xcode_16.app || xcodebuild -version
+        run: |
+          # Prefer an explicit Xcode 16 if present, else use the image default,
+          # then HARD-FAIL if the active Xcode is < 16 (runner images drift).
+          if [ -d /Applications/Xcode_16.app ]; then
+            sudo xcode-select -s /Applications/Xcode_16.app
+          fi
+          ver="$(xcodebuild -version | awk 'NR==1 {print $2}')"
+          echo "Active Xcode: $ver"
+          if [ "${ver%%.*}" -lt 16 ]; then
+            echo "Xcode 16+ required, but active Xcode is $ver" >&2
+            exit 1
+          fi
 
       - name: Derive version numbers from tag
         id: ver
@@ -48,15 +59,28 @@ jobs:
           echo "$DEVELOPER_ID_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
           security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" \
             -P "$DEVELOPER_ID_P12_PASSWORD" -T /usr/bin/codesign
-          # WWDR G3 intermediate (see SIGNING.md gotcha)
+          # WWDR G3 intermediate (see SIGNING.md gotcha). curl -f fails hard on a
+          # download error; the import tolerates "already exists" but fails on any
+          # other error rather than deferring an opaque trust-chain failure to codesign.
           curl -fsSL -o "$RUNNER_TEMP/wwdr.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
-          security import "$RUNNER_TEMP/wwdr.cer" -k "$KEYCHAIN" || true
+          if ! wwdr_out="$(security import "$RUNNER_TEMP/wwdr.cer" -k "$KEYCHAIN" 2>&1)"; then
+            if echo "$wwdr_out" | grep -q "already exists"; then
+              echo "WWDR cert already present; continuing."
+            else
+              echo "WWDR cert import failed: $wwdr_out" >&2
+              exit 1
+            fi
+          fi
           security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KPW" "$KEYCHAIN"
           rm -f "$RUNNER_TEMP/cert.p12"
           echo "BUILD_KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
-          # Sparkle EdDSA private key -> Keychain (generate_appcast reads it there)
-          echo "$SPARKLE_ED_PRIVATE_KEY" > "$RUNNER_TEMP/sparkle_key.txt"
+          # Sparkle EdDSA private key -> a file passed directly to generate_appcast
+          # via --ed-key-file (robust: no keychain import that could silently fail
+          # or, worse, sign with the wrong key). Lives only in ephemeral RUNNER_TEMP.
+          umask 077
+          printf '%s' "$SPARKLE_ED_PRIVATE_KEY" > "$RUNNER_TEMP/sparkle_ed_key"
+          echo "ED_KEY_FILE=$RUNNER_TEMP/sparkle_ed_key" >> "$GITHUB_ENV"
 
       - name: Fetch Sparkle tools
         run: |
@@ -65,9 +89,8 @@ jobs:
             "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
           tar -xf sparkle.tar.xz
           echo "SPARKLE_BIN=$RUNNER_TEMP/bin" >> "$GITHUB_ENV"
-          # Import the EdDSA private key into the login/build keychain for signing.
-          "$RUNNER_TEMP/bin/generate_keys" -f "$RUNNER_TEMP/sparkle_key.txt" || true
-          rm -f "$RUNNER_TEMP/sparkle_key.txt"
+          # No keychain import needed: generate_appcast reads the EdDSA key from
+          # ED_KEY_FILE (--ed-key-file) set in the signing-cert step.
 
       - name: Build (Release, universal, hardened runtime)
         run: |
@@ -133,6 +156,7 @@ jobs:
           ZIP_PATH="${{ steps.pkg.outputs.zip }}" \
           RELEASE_NOTES_MD="${{ steps.notes.outputs.path }}" \
           SPARKLE_BIN="$SPARKLE_BIN" \
+          ED_KEY_FILE="$ED_KEY_FILE" \
           DOWNLOAD_URL_PREFIX="https://github.com/DavidsonCollege/Oncillascope/releases/download/${GITHUB_REF_NAME}/" \
           PAGES_DIR="$RUNNER_TEMP/pages" \
           bash scripts/make-appcast.sh

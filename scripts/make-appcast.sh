@@ -9,6 +9,12 @@
 #   SPARKLE_BIN          directory containing generate_appcast
 #   DOWNLOAD_URL_PREFIX  e.g. https://github.com/DavidsonCollege/Oncillascope/releases/download/v1.1.0/
 #   PAGES_DIR            checked-out gh-pages working tree (output dir)
+#
+# Optional env:
+#   ED_KEY_FILE          path to the private EdDSA key file. If set, it is passed
+#                        to generate_appcast via --ed-key-file (robust for CI);
+#                        if unset, generate_appcast falls back to the Keychain
+#                        (convenient for local runs where the key is installed).
 set -euo pipefail
 
 : "${VERSION:?}"; : "${TAG:?}"; : "${ZIP_PATH:?}"; : "${RELEASE_NOTES_MD:?}"
@@ -36,15 +42,17 @@ else
     echo '</pre></body>'; } > "$notes_html"
 fi
 
-# Sparkle reads the EdDSA private key from the Keychain (CI imports it first) and
-# signs each enclosure. --download-url-prefix makes enclosure URLs point at the
-# GitHub Release asset. --link sets the release-notes URL base is handled per-item
-# by generate_appcast when a matching <version>.html sits alongside; we set the
-# feed's own URLs via the prefix and post-process the release notes link.
-"$SPARKLE_BIN/generate_appcast" \
-  --download-url-prefix "$DOWNLOAD_URL_PREFIX" \
-  --link "https://github.com/DavidsonCollege/Oncillascope/releases" \
-  "$work"
+# generate_appcast signs each enclosure with the EdDSA private key and writes the
+# merged appcast. The key comes from --ed-key-file when ED_KEY_FILE is set (CI),
+# otherwise from the Keychain (local). --download-url-prefix makes enclosure URLs
+# point at the GitHub Release asset; --link sets the feed's channel link.
+# (Per-item release-notes linking is verified during the release E2E, not here.)
+gen_args=(--download-url-prefix "$DOWNLOAD_URL_PREFIX" \
+          --link "https://github.com/DavidsonCollege/Oncillascope/releases")
+if [ -n "${ED_KEY_FILE:-}" ]; then
+  gen_args=(--ed-key-file "$ED_KEY_FILE" "${gen_args[@]}")
+fi
+"$SPARKLE_BIN/generate_appcast" "${gen_args[@]}" "$work"
 
 # Safety: never publish a feed that lost history. generate_appcast should
 # merge, not shrink — if item count dropped, something went wrong; abort.
