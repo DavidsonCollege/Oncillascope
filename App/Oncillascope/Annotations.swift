@@ -2,9 +2,8 @@ import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
 
-/// A fixed, named palette for user-assigned network colors (parity with WiFi Explorer's
-/// per-network coloring). Stored by name so the choice is stable and Codable; `.none`
-/// means "no color assigned".
+/// A fixed, named palette for user-assigned network colors. Stored by name so the choice
+/// is stable and Codable; `.none` means "no color assigned".
 enum NetworkColor: String, CaseIterable, Codable, Identifiable {
     case none, red, orange, yellow, green, teal, blue, purple, gray
 
