@@ -2,9 +2,9 @@
 
 A free, open-source macOS app that surfaces **as much RF / Wi-Fi detail as the native
 Apple wireless adapter and its system APIs allow** — for the current connection and for
-all visible nearby networks. It aims to match or exceed paid tools (WiFi Explorer Pro,
-WiFi Signal) while staying inside what Apple permits on stock hardware: no external USB
-radios, no kernel extensions, and no disruptive monitor-mode capture in the default flow.
+all visible nearby networks. It aims to match or exceed commercial Wi-Fi analyzers while
+staying inside what Apple permits on stock hardware: no external USB radios, no kernel
+extensions, and no disruptive monitor-mode capture in the default flow.
 
 The defining feature is **completeness**: Oncillascope fuses every available data source —
 CoreWLAN (identity, live stats, scan, raw IEs), parsed `wdutil info` (PHY-layer metrics),
@@ -163,6 +163,3 @@ produced automatically by the CI pipeline described in [`RELEASING.md`](RELEASIN
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
-Prior art studied (not copied): `chbrown/macos-wifi`, `mikaellofgren/wandra`,
-`nolze/tiny-wifi-analyzer`, `jaisonerick/macwifi`.

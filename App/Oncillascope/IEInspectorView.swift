@@ -73,7 +73,7 @@ struct IEInspectorView: View {
     }
 }
 
-/// Editable color + note for a network (parity with WiFi Explorer annotations).
+/// Editable color + note for a network.
 /// Keyed by `network.id` from the caller (`.id(...)`) so its local note state resets
 /// when the selection changes.
 private struct AnnotationEditor: View {
