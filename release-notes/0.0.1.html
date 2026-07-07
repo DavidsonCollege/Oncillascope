@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><body><pre>
+fix(ci): deep-sign Sparkle nested helpers for notarization
+
+Notarization rejected Sparkle.framework's Updater.app, Autoupdate, and XPC
+services (Downloader/Installer) as unsigned-by-Developer-ID / no secure
+timestamp. Re-sign them inside-out with --options runtime --timestamp, then
+re-seal the app (preserving entitlements) before notarytool submit.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) &lt;noreply@anthropic.com&gt;
+
+</pre></body>
