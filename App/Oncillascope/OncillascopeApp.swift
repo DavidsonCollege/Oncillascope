@@ -31,6 +31,14 @@ private struct HelperMenu: View {
     }
 }
 
+private struct EmailExportCommandButton: View {
+    @FocusedValue(\.emailExportAction) private var action
+    var body: some View {
+        Button("Email Exports to Helpdesk…") { action?.trigger() }
+            .disabled(action == nil)
+    }
+}
+
 @main
 struct OncillascopeApp: App {
     @StateObject private var model = AppModel()
@@ -41,6 +49,7 @@ struct OncillascopeApp: App {
             ContentView()
                 .environmentObject(model)
                 .environmentObject(annotations)
+                .modifier(EmailExportSheetPresenter())
                 // Set ideal size only (no minimum — a min frame collapses the split
                 // view). This makes the window open at ~1100x720 instead of adopting
                 // the content's runaway ideal height, while staying freely resizable.
@@ -65,6 +74,7 @@ struct OncillascopeApp: App {
                 Button("Export Snapshot as JSON…") { model.exportSnapshotJSON() }
                 Button("Export Annotations as CSV…") { annotations.exportAnnotationsCSV() }
                     .disabled(annotations.items.isEmpty)
+                EmailExportCommandButton()
             }
         }
     }
