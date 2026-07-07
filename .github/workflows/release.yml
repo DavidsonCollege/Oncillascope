@@ -19,17 +19,21 @@ jobs:
 
       - name: Select Xcode 16+
         run: |
-          # Prefer an explicit Xcode 16 if present, else use the image default,
-          # then HARD-FAIL if the active Xcode is < 16 (runner images drift).
-          if [ -d /Applications/Xcode_16.app ]; then
-            sudo xcode-select -s /Applications/Xcode_16.app
-          fi
-          ver="$(xcodebuild -version | awk 'NR==1 {print $2}')"
-          echo "Active Xcode: $ver"
-          if [ "${ver%%.*}" -lt 16 ]; then
-            echo "Xcode 16+ required, but active Xcode is $ver" >&2
+          # Select the NEWEST installed Xcode >= 16 rather than assuming a fixed
+          # path (the runner default may be 15.x, and bundle names vary by image).
+          sel="$(for app in /Applications/Xcode*.app; do
+                   [ -d "$app" ] || continue
+                   v="$("$app/Contents/Developer/usr/bin/xcodebuild" -version 2>/dev/null | awk 'NR==1{print $2}')"
+                   [ -n "$v" ] || continue
+                   printf '%s\t%s\n' "$v" "$app"
+                 done | sort -V | awk -F'\t' '($1+0)>=16{last=$2} END{print last}')"
+          if [ -z "$sel" ]; then
+            echo "No Xcode 16+ found on this runner. Installed Xcodes:" >&2
+            ls -d /Applications/Xcode*.app >&2 || true
             exit 1
           fi
+          sudo xcode-select -s "$sel"
+          echo "Selected $(xcodebuild -version | head -1) at $sel"
 
       - name: Derive version numbers from tag
         id: ver
