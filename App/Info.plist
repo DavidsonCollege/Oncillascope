@@ -34,5 +34,9 @@
     <string>Oncillascope needs Location access because macOS only reveals Wi-Fi network names (SSID) and hardware addresses (BSSID) to apps with this permission. Oncillascope does not track or store your location.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Oncillascope needs Location access because macOS only reveals Wi-Fi network names (SSID) and hardware addresses (BSSID) to apps with this permission. Oncillascope does not track or store your location.</string>
+    <key>SUFeedURL</key>
+    <string>https://davidsoncollege.github.io/Oncillascope/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>M7pDJUY5xEzjXJQK9zR1ue4lC45oUgVaSjusK2RnWv0=</string>
 </dict>
 </plist>
