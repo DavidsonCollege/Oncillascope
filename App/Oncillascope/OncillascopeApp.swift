@@ -49,7 +49,7 @@ struct OncillascopeApp: App {
             ContentView()
                 .environmentObject(model)
                 .environmentObject(annotations)
-                .modifier(EmailExportSheetPresenter())
+                .modifier(EmailExportSheetPresenter(model: model, annotations: annotations))
                 // Set ideal size only (no minimum — a min frame collapses the split
                 // view). This makes the window open at ~1100x720 instead of adopting
                 // the content's runaway ideal height, while staying freely resizable.
