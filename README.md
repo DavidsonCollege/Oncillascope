@@ -15,9 +15,16 @@ CoreWLAN (identity, live stats, scan, raw IEs), parsed `wdutil info` (PHY-layer 
 and a pure-Swift 802.11 Information Element parser — into one view.
 
 > **Status:** v1.0. The full core (parsing, fusion, telemetry, export) is implemented and
-> unit-tested (34/34); the SwiftUI app builds and runs on macOS 14–26 and ships **signed +
+> unit-tested (44/44); the SwiftUI app builds and runs on macOS 14–26 and ships **signed +
 > notarized** under Developer ID. An optional **privileged helper** (SMAppService) enables
 > prompt-free, continuous PHY metrics.
+
+## Download
+
+**[⬇ Download the latest release](https://github.com/DavidsonCollege/Oncillascope/releases/latest)**
+— a signed + notarized universal build for macOS 14 (Sonoma) or later. After the first launch
+the app keeps itself up to date automatically (see [Updating](#updating)); no need to return
+here for future versions.
 
 ---
 
