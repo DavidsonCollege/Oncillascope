@@ -105,7 +105,7 @@ jobs:
 
       - name: Build (Release, universal, hardened runtime)
         run: |
-          xcodebuild -scheme Oncillascope -configuration Release -derivedDataPath build \
+          xcodebuild -project App/Oncillascope.xcodeproj -scheme Oncillascope -configuration Release -derivedDataPath build \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
