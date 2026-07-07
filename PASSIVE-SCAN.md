@@ -1,6 +1,6 @@
 # Passive-scan / monitor-mode feasibility spike
 
-**Question:** Can Oncillascope close the biggest gap with WiFi Explorer **Pro** — passive
+**Question:** Can Oncillascope close its biggest capability gap — passive
 scanning (monitor mode) for hidden SSIDs, real airtime/retry stats, and frames from
 non-beaconing devices — *on the stock built-in adapter*, without external hardware?
 
@@ -24,8 +24,8 @@ platform prohibition.
   disassociates Wi-Fi (see "Live confirmation" below).
 
 Strong prior evidence this works on this exact class of machine: Wireshark's macOS docs
-and WiFi Explorer Pro both perform monitor-mode capture on the built-in adapter of Apple
-Silicon Macs. The live step below confirms it on *this* unit.
+describe monitor-mode capture on the built-in adapter of Apple Silicon Macs. The live
+step below confirms it on *this* unit.
 
 ---
 
@@ -40,7 +40,7 @@ Silicon Macs. The live step below confirms it on *this* unit.
 | Per-frame RSSI | Per-scan aggregate | Per-frame, from radiotap header |
 | Management frame detail | Beacon IEs only | Beacons + probes + assoc + auth/deauth |
 
-The first two rows are the headline parity items with WiFi Explorer Pro.
+The first two rows are the headline capabilities that passive capture unlocks.
 
 ---
 
