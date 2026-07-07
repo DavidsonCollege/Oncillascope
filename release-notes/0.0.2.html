@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><body><pre>
+fix(update): drive bundle version from build settings, not hardcoded literals
+
+Info.plist hardcoded CFBundleShortVersionString=1.0 / CFBundleVersion=1, so the
+CI's MARKETING_VERSION/CURRENT_PROJECT_VERSION overrides were ignored and every
+release reported version 1 — Sparkle would never detect a newer build. Reference
+$(MARKETING_VERSION)/$(CURRENT_PROJECT_VERSION) (project defines both; verified a
+local build stamps the injected values).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) &lt;noreply@anthropic.com&gt;
+
+</pre></body>
