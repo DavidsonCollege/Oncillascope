@@ -15,6 +15,7 @@ set -euo pipefail
 : "${SPARKLE_BIN:?}"; : "${DOWNLOAD_URL_PREFIX:?}"; : "${PAGES_DIR:?}"
 
 work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
 # generate_appcast scans a directory of archives and MERGES into an existing
 # appcast.xml if one is already present in that directory — so seed it with the
 # current published feed to retain historical <item>s.
@@ -44,6 +45,19 @@ fi
   --download-url-prefix "$DOWNLOAD_URL_PREFIX" \
   --link "https://github.com/DavidsonCollege/Oncillascope/releases" \
   "$work"
+
+# Safety: never publish a feed that lost history. generate_appcast should
+# merge, not shrink — if item count dropped, something went wrong; abort.
+new_items="$(grep -c '<item>' "$work/appcast.xml" 2>/dev/null || true)"
+if [ -f "$PAGES_DIR/appcast.xml" ]; then
+  old_items="$(grep -c '<item>' "$PAGES_DIR/appcast.xml" 2>/dev/null || true)"
+else
+  old_items=0
+fi
+if [ ! -s "$work/appcast.xml" ] || [ "${new_items:-0}" -lt "${old_items:-0}" ]; then
+  echo "Refusing to publish: generated appcast has ${new_items:-0} item(s), fewer than the existing ${old_items:-0}." >&2
+  exit 1
+fi
 
 cp "$work/appcast.xml" "$PAGES_DIR/appcast.xml"
 echo "Wrote $PAGES_DIR/appcast.xml and $notes_html"
