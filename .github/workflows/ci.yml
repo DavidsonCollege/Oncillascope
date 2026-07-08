@@ -1,0 +1,36 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16+
+        run: |
+          # Same selection logic as release.yml: pick the newest installed
+          # Xcode >= 16 (Package.swift needs Swift 6) rather than trusting the
+          # runner default.
+          sel="$(for app in /Applications/Xcode*.app; do
+                   [ -d "$app" ] || continue
+                   v="$("$app/Contents/Developer/usr/bin/xcodebuild" -version 2>/dev/null | awk 'NR==1{print $2}')"
+                   [ -n "$v" ] || continue
+                   printf '%s\t%s\n' "$v" "$app"
+                 done | sort -V | awk -F'\t' '($1+0)>=16{last=$2} END{print last}')"
+          if [ -z "$sel" ]; then
+            echo "No Xcode 16+ found on this runner. Installed Xcodes:" >&2
+            ls -d /Applications/Xcode*.app >&2 || true
+            exit 1
+          fi
+          sudo xcode-select -s "$sel"
+          echo "Selected $(xcodebuild -version | head -1) at $sel"
+
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test

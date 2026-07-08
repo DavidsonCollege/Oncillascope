@@ -38,6 +38,9 @@ jobs:
           sudo xcode-select -s "$sel"
           echo "Selected $(xcodebuild -version | head -1) at $sel"
 
+      - name: Run unit tests
+        run: swift test
+
       - name: Derive version numbers from tag
         id: ver
         run: |
