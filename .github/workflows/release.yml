@@ -10,6 +10,9 @@ permissions:
 jobs:
   release:
     runs-on: macos-14
+    # Requires a manual approval in the GitHub UI before the job (and its access to
+    # the signing secrets) starts — see Settings ▸ Environments ▸ release.
+    environment: release
     env:
       TEAM_ID: "4Z539UE4TT"
       FEED_APP_NAME: "Oncillascope"
