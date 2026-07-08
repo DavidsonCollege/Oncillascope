@@ -78,12 +78,21 @@ public enum Exporter {
         return rows.joined(separator: "\n") + "\n"
     }
 
-    /// RFC-4180 field escaping: wrap in quotes and double internal quotes when the
-    /// field contains a comma, quote, or newline.
+    /// RFC-4180 field escaping plus spreadsheet formula defusing.
+    ///
+    /// Fields a spreadsheet would evaluate as a formula (leading `=`, `+`, `-`, `@`,
+    /// tab, or CR — e.g. a hostile SSID broadcast near the user) are prefixed with a
+    /// single quote, the standard CSV-injection mitigation. Plain numbers are exempt
+    /// so numeric columns like RSSI ("-70") stay chartable. Then wrap in quotes and
+    /// double internal quotes when the field contains a comma, quote, or newline.
     static func escape(_ field: String) -> String {
-        guard field.contains(where: { $0 == "," || $0 == "\"" || $0 == "\n" || $0 == "\r" }) else {
-            return field
+        var out = field
+        if let first = out.first, "=+-@\t\r".contains(first), Double(out) == nil {
+            out = "'" + out
         }
-        return "\"" + field.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+        guard out.contains(where: { $0 == "," || $0 == "\"" || $0 == "\n" || $0 == "\r" }) else {
+            return out
+        }
+        return "\"" + out.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 }
