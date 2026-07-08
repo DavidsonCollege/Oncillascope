@@ -104,4 +104,38 @@ final class TelemetryTests: XCTestCase {
         XCTAssertEqual(Exporter.escape("a,b"), "\"a,b\"")
         XCTAssertEqual(Exporter.escape("say \"hi\""), "\"say \"\"hi\"\"\"")
     }
+
+    // MARK: - CSV formula-injection defense
+
+    func testEscapeNeutralizesFormulaPrefixes() {
+        // Anyone can broadcast an SSID starting with a formula trigger; Excel/Sheets
+        // would execute it when the exported CSV is opened. Defuse with a leading '.
+        XCTAssertEqual(Exporter.escape("=1+1"), "'=1+1")
+        XCTAssertEqual(Exporter.escape("@SUM(A1)"), "'@SUM(A1)")
+        XCTAssertEqual(Exporter.escape("+cmd|calc"), "'+cmd|calc")
+        XCTAssertEqual(Exporter.escape("-2+3"), "'-2+3")
+        XCTAssertEqual(Exporter.escape("\ttabbed"), "'\ttabbed")
+        // Defusing composes with RFC-4180 quoting when the field also needs quotes.
+        XCTAssertEqual(Exporter.escape("=HYPERLINK(\"http://evil\")"),
+                       "\"'=HYPERLINK(\"\"http://evil\"\")\"")
+    }
+
+    func testEscapeLeavesPlainNumbersAlone() {
+        // Numeric columns (RSSI, noise) legitimately start with '-'; they must stay
+        // numeric so the helpdesk can chart/sort them.
+        XCTAssertEqual(Exporter.escape("-70"), "-70")
+        XCTAssertEqual(Exporter.escape("-3.5"), "-3.5")
+        XCTAssertEqual(Exporter.escape("+5"), "+5")
+    }
+
+    func testNetworksCSVDefusesHostileSSID() {
+        let net = BSSObservation(ssid: "=1+1", bssid: "AA:BB:CC:DD:EE:FF",
+                                 vendor: "Apple", rssi: -50, noise: -90,
+                                 channel: ChannelInfo(number: 36, width: .mhz80, band: .ghz5),
+                                 security: .wpa3Personal, phyGeneration: .ax, beaconInterval: 100)
+        let csv = Exporter.networksCSV([net])
+        // The data row must not begin with a live formula.
+        XCTAssertTrue(csv.contains("\n'=1+1,"))
+        XCTAssertFalse(csv.contains("\n=1+1,"))
+    }
 }
