@@ -44,6 +44,22 @@ final class TelemetryTests: XCTestCase {
         XCTAssertEqual(store.markers.first?.kind, .channelChange)
     }
 
+    func testMarkersAreBounded() {
+        // Samples are ring-buffered; markers must be bounded too, or a flapping AP
+        // (roam every sample) grows memory without limit over a multi-day session.
+        let store = TelemetryStore(capacity: 100)
+        let t0 = Date(timeIntervalSince1970: 5_000)
+        for i in 0..<(TelemetryStore.maxMarkers + 50) {
+            store.record(TelemetrySample(timestamp: t0 + Double(i), rssi: -50, noise: -90,
+                                         txRate: 866, bssid: i.isMultiple(of: 2) ? "AA" : "BB",
+                                         channel: 36))
+        }
+        XCTAssertEqual(store.markers.count, TelemetryStore.maxMarkers)
+        // Oldest markers are dropped; the newest is retained.
+        XCTAssertEqual(store.markers.last?.timestamp,
+                       t0 + Double(TelemetryStore.maxMarkers + 49))
+    }
+
     func testWindowFilter() {
         let store = TelemetryStore(capacity: 100)
         let now = Date(timeIntervalSince1970: 10_000)

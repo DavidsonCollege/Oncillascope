@@ -15,7 +15,7 @@ CoreWLAN (identity, live stats, scan, raw IEs), parsed `wdutil info` (PHY-layer 
 and a pure-Swift 802.11 Information Element parser — into one view.
 
 > **Status:** v1.0. The full core (parsing, fusion, telemetry, export) is implemented and
-> unit-tested (44/44); the SwiftUI app builds and runs on macOS 14–26 and ships **signed +
+> unit-tested (the full suite runs in CI on every PR); the SwiftUI app builds and runs on macOS 14–26 and ships **signed +
 > notarized** under Developer ID. An optional **privileged helper** (SMAppService) enables
 > prompt-free, continuous PHY metrics.
 
@@ -119,7 +119,7 @@ on first launch and can disable anytime in the update dialog.
 
 ```bash
 swift build
-swift test     # 34 tests
+swift test     # full suite
 ```
 
 ### The app

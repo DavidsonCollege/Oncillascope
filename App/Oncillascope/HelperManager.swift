@@ -91,9 +91,13 @@ final class HelperManager {
                 resumer.fail(WdutilRunner.WdutilError.notAuthorized)
                 return
             }
-            proxy.fetchWdutilInfo { output, _ in
+            proxy.fetchWdutilInfo { output, error in
                 if let output, !output.isEmpty {
                     resumer.succeed(output)
+                } else if let error {
+                    // Surface the helper's specific failure reason (e.g. "wdutil exited
+                    // with status 2: …") instead of flattening it to "not authorized".
+                    resumer.fail(WdutilRunner.WdutilError.failed(error))
                 } else {
                     resumer.fail(WdutilRunner.WdutilError.notAuthorized)
                 }

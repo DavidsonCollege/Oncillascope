@@ -33,18 +33,36 @@ final class HelperService: NSObject, OncillascopeHelperProtocol {
             reply(nil, "Failed to launch wdutil: \(error.localizedDescription)")
             return
         }
+
+        // Drain both pipes *before* waiting on exit: a child that writes more than the
+        // ~64 KB pipe buffer while nobody reads would block forever against
+        // waitUntilExit. stderr drains on a background queue, stdout on this thread.
+        let errBuffer = PipeBuffer()
+        let errHandle = stderr.fileHandleForReading
+        let group = DispatchGroup()
+        group.enter()
+        DispatchQueue.global().async {
+            errBuffer.data = errHandle.readDataToEndOfFile()
+            group.leave()
+        }
+        let outData = stdout.fileHandleForReading.readDataToEndOfFile()
+        group.wait()
         process.waitUntilExit()
 
-        let outData = stdout.fileHandleForReading.readDataToEndOfFile()
         let text = String(data: outData, encoding: .utf8) ?? ""
 
         if process.terminationStatus != 0 {
-            let errData = stderr.fileHandleForReading.readDataToEndOfFile()
-            let errText = String(data: errData, encoding: .utf8) ?? ""
+            let errText = String(data: errBuffer.data, encoding: .utf8) ?? ""
             reply(text.isEmpty ? nil : text,
                   "wdutil exited with status \(process.terminationStatus): \(errText)")
             return
         }
         reply(text, nil)
     }
+}
+
+/// Reference-type byte sink so the concurrent stderr reader can fill it while the
+/// calling thread drains stdout. Synchronized by the DispatchGroup barrier above.
+private final class PipeBuffer: @unchecked Sendable {
+    var data = Data()
 }
