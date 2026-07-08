@@ -21,12 +21,26 @@ public struct WdutilRunner: Sendable {
         case helper(invoke: @Sendable () async throws -> String)
     }
 
-    public enum WdutilError: Error, Sendable, Equatable {
+    public enum WdutilError: Error, Sendable, Equatable, LocalizedError {
         case notAuthorized
         case userCancelled
         case executableMissing
         case nonZeroExit(Int32)
         case emptyOutput
+        /// A strategy reported a specific, human-readable failure (e.g. the helper
+        /// daemon's error string); carried through so the UI can show the real reason.
+        case failed(String)
+
+        public var errorDescription: String? {
+            switch self {
+            case .notAuthorized:      return "Administrator authorization is required."
+            case .userCancelled:      return "The authorization dialog was cancelled."
+            case .executableMissing:  return "The system tool required for PHY metrics was not found."
+            case .nonZeroExit(let s): return "wdutil exited with status \(s)."
+            case .emptyOutput:        return "wdutil produced no output."
+            case .failed(let reason): return reason
+            }
+        }
     }
 
     public var strategy: Strategy

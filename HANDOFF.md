@@ -4,9 +4,9 @@ A native macOS Wi-Fi / RF analyzer (Swift + SwiftUI). This doc orients a new age
 Read alongside `README.md` (what it does), `SIGNING.md` (signing/notarization), and
 `NAMING.md` (name vetting history).
 
-## TL;DR status (2026-06-26)
+## TL;DR status (2026-07-08)
 
-- ✅ Core + app **built, tested (34/34), signed, NOTARIZED, and installed**.
+- ✅ Core + app **built, tested (full SwiftPM suite, green in CI), signed, NOTARIZED, and installed**.
 - ✅ Shareable notarized build: `~/Downloads/Oncillascope-1.0.zip`; installed at
   `/Applications/Oncillascope.app` (Gatekeeper: "accepted / Notarized Developer ID").
 - ✅ Name **Oncillascope** finalized (was "AirScope" — taken on the Mac App Store).
@@ -21,8 +21,9 @@ Read alongside `README.md` (what it does), `SIGNING.md` (signing/notarization), 
   with `xcrun notarytool submit <zip> --keychain-profile OncillascopeNotary --wait` (no
   password needed). Re-store with `notarytool store-credentials` after rotating the
   app-specific password.
-- Repo is **local git only** (`~/Github/macos-wifi-analyzer`), **not pushed**. Per the
-  user's global rule, if pushed it goes under the **DavidsonCollege** GitHub org.
+- Repo lives at **github.com/DavidsonCollege/Oncillascope** (public). `main` is
+  protected (PRs + green CI required); releases are tag-triggered and gated behind a
+  manual approval on the `release` environment.
 
 ## What it is
 
@@ -42,7 +43,7 @@ inspector), Channel Map (spectrum curves + best-channel advice), Telemetry & Exp
   - `Sources/OUIResolver` — offline BSSID→vendor (bundled `Resources/oui.csv`).
   - `Sources/Telemetry` — ring buffers + CSV/JSON export + roam/channel markers.
   - `Sources/WiFiCore` — CoreWLAN + CoreLocation wrappers; fuses everything.
-  - `Tests/*` — 34 tests (IEParser, WdutilBridge, OUIResolver, Telemetry).
+  - `Tests/*` — unit tests (IEParser, WdutilBridge, OUIResolver, Telemetry; run in CI).
 - `App/Oncillascope.xcodeproj` — **hand-crafted** pbxproj (objectVersion 77, uses a
   `PBXFileSystemSynchronizedRootGroup`, so source files aren't listed individually).
   - `App/Oncillascope/` — SwiftUI sources + `Assets.xcassets` (AppIcon, AccentColor).

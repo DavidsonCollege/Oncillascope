@@ -59,6 +59,11 @@ public struct TimelineMarker: Codable, Sendable, Hashable, Identifiable {
 /// Rolling store of telemetry samples + auto-detected roam/channel markers.
 public final class TelemetryStore: @unchecked Sendable {
     private var buffer: RingBuffer<TelemetrySample>
+    /// Cap on retained markers. Samples are ring-buffered, so markers must be bounded
+    /// too — a flapping AP roaming every sample would otherwise grow memory without
+    /// limit over a multi-day session. Oldest markers are dropped first.
+    public static let maxMarkers = 500
+
     private(set) public var markers: [TimelineMarker] = []
     private var lastBSSID: String?
     private var lastChannel: Int?
@@ -83,6 +88,9 @@ public final class TelemetryStore: @unchecked Sendable {
         }
         if let b = sample.bssid { lastBSSID = b }
         if sample.channel != 0 { lastChannel = sample.channel }
+        if markers.count > Self.maxMarkers {
+            markers.removeFirst(markers.count - Self.maxMarkers)
+        }
         buffer.append(sample)
     }
 

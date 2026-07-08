@@ -17,8 +17,11 @@ jobs:
       TEAM_ID: "4Z539UE4TT"
       FEED_APP_NAME: "Oncillascope"
       SPARKLE_VERSION: "2.6.4"
+      # SHA-256 of Sparkle-${SPARKLE_VERSION}.tar.xz — update together with the
+      # version so the release tooling can't be silently swapped upstream.
+      SPARKLE_SHA256: "50612a06038abc931f16011d7903b8326a362c1074dabccb718404ce8e585f0b"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
 
       - name: Select Xcode 16+
         run: |
@@ -97,6 +100,7 @@ jobs:
           cd "$RUNNER_TEMP"
           curl -fsSL -o sparkle.tar.xz \
             "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          echo "${SPARKLE_SHA256}  sparkle.tar.xz" | shasum -a 256 -c -
           tar -xf sparkle.tar.xz
           # Locate generate_appcast rather than assuming bin/ is top-level, so a
           # future SPARKLE_VERSION bump or nested archive layout won't break the run.
