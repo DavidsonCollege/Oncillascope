@@ -135,7 +135,11 @@ final class AnnotationStore: ObservableObject {
 /// A compact menu that shows the assigned color as a swatch and lets the user pick one.
 /// Used in the networks table and grouped list.
 struct ColorSwatchMenu: View {
-    @EnvironmentObject var annotations: AnnotationStore
+    // Injected explicitly, NOT via @EnvironmentObject: Table cells and Menu content are
+    // re-evaluated in a detached attribute-graph branch on macOS where ancestor
+    // .environmentObject values can be absent (e.g. row churn after sleep/wake), and
+    // @EnvironmentObject responds to that with fatalError. Seen crashing in the field.
+    @ObservedObject var annotations: AnnotationStore
     let id: String
     let ssid: String?
     let bssid: String?
@@ -181,7 +185,10 @@ struct SwatchDot: View {
 
 /// A horizontal row of selectable color swatches for the inspector.
 struct ColorPickerRow: View {
-    @EnvironmentObject var annotations: AnnotationStore
+    // Injected explicitly for the same reason as ColorSwatchMenu: this lives in the
+    // inspector panel, a presentation context that (like sheets — see
+    // EmailExportSheetPresenter) does not reliably inherit environment objects.
+    @ObservedObject var annotations: AnnotationStore
     let id: String
     let ssid: String?
     let bssid: String?

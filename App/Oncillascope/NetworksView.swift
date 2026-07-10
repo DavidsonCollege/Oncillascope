@@ -46,7 +46,7 @@ struct NetworksView: View {
         }
         .inspector(isPresented: .constant(selection != nil)) {
             if let net = selectedNetwork {
-                IEInspectorView(network: net)
+                IEInspectorView(network: net, annotations: annotations)
                     .inspectorColumnWidth(min: 320, ideal: 380, max: 520)
             } else {
                 Text("Select a network").foregroundStyle(.secondary)
@@ -112,7 +112,7 @@ struct NetworksView: View {
         Table(filtered.sorted(using: sortOrder), selection: $selection, sortOrder: $sortOrder) {
             TableColumn("SSID") { n in
                 HStack(spacing: 6) {
-                    ColorSwatchMenu(id: n.id, ssid: n.ssid, bssid: n.bssid)
+                    ColorSwatchMenu(annotations: annotations, id: n.id, ssid: n.ssid, bssid: n.bssid)
                     Text(n.ssid?.isEmpty == false ? n.ssid! : "<hidden>")
                         .foregroundStyle(annotations.color(for: n.id).color ?? .primary)
                     let note = annotations.annotation(for: n.id).note
@@ -151,7 +151,7 @@ struct NetworksView: View {
                 SwiftUI.Section(header: Text("\(name)  ·  \(members.count) BSS")) {
                     ForEach(members) { n in
                         HStack {
-                            ColorSwatchMenu(id: n.id, ssid: n.ssid, bssid: n.bssid)
+                            ColorSwatchMenu(annotations: annotations, id: n.id, ssid: n.ssid, bssid: n.bssid)
                             Text(redact(n.bssid)).font(.system(.body, design: .monospaced))
                             Badge(text: n.channel.label, color: n.channel.band.tint)
                             Badge(text: n.phyGeneration.standardLabel, color: n.phyGeneration.badgeColor)
