@@ -16,6 +16,12 @@ struct ChannelMapView: View {
         model.networks.filter { $0.channel.band == band && $0.channel.primaryCenterMHz != nil }
     }
 
+    /// Detected networks that can't be placed on any band tab (unknown band or an
+    /// unmappable channel number). Surfaced as a count instead of silently dropped.
+    private var unmappableCount: Int {
+        model.networks.filter { $0.channel.primaryCenterMHz == nil }.count
+    }
+
     /// Whether this Mac's radio supports the selected band. Unknown (empty set, e.g.
     /// Wi-Fi off) is treated as supported to avoid a false "unsupported" claim.
     private var bandSupported: Bool {
@@ -31,7 +37,19 @@ struct ChannelMapView: View {
                     }
                     .pickerStyle(.segmented).fixedSize()
                     Spacer()
-                    Text("\(networksInBand.count) BSS in band").font(.caption).foregroundStyle(.secondary)
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text("\(networksInBand.count) BSS in band").font(.caption).foregroundStyle(.secondary)
+                        Text("All detected networks — ignores the Networks table's filters")
+                            .font(.caption2).foregroundStyle(.tertiary)
+                    }
+                }
+
+                // Networks that can't be plotted would otherwise vanish silently and
+                // read as a mismatch against the Networks table.
+                if unmappableCount > 0 {
+                    Label("\(unmappableCount) network\(unmappableCount == 1 ? "" : "s") with an unknown channel can't be plotted (still listed in the Networks table).",
+                          systemImage: "questionmark.circle")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
 
                 if !bandSupported {
@@ -68,8 +86,10 @@ struct ChannelMapView: View {
                              series: .value("BSS", net.id))
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(color(for: net))
-                    // Highlight the hovered curve; dim the rest.
-                    .opacity(hovered == nil ? 0.85 : (hovered?.id == net.id ? 1.0 : 0.18))
+                    // Highlight the hovered curve; dim the rest. Stale networks
+                    // (missed the latest scan pass) draw faded, matching the table.
+                    .opacity((hovered == nil ? 0.85 : (hovered?.id == net.id ? 1.0 : 0.18))
+                             * (model.isStale(net.id) ? 0.35 : 1.0))
                     .lineStyle(StrokeStyle(lineWidth: hovered?.id == net.id ? 3 : 1.6))
                 }
             }
