@@ -4,6 +4,9 @@ import WiFiModel
 /// Per-BSS detail with the fully decoded IE tree (spec §4.5).
 struct IEInspectorView: View {
     let network: BSSObservation
+    // Injected explicitly — the inspector panel does not reliably inherit
+    // environment objects (same gap as sheets; see EmailExportSheetPresenter).
+    @ObservedObject var annotations: AnnotationStore
     @AppStorage(plainEnglishTooltipsKey) private var plainEnglish = false
 
     var body: some View {
@@ -11,7 +14,7 @@ struct IEInspectorView: View {
             VStack(alignment: .leading, spacing: 14) {
                 summary
                 Divider()
-                AnnotationEditor(network: network).id(network.id)
+                AnnotationEditor(network: network, annotations: annotations).id(network.id)
                 Divider()
                 Text("Information Elements").font(.headline)
                 if network.rawIEs.isEmpty {
@@ -78,7 +81,9 @@ struct IEInspectorView: View {
 /// when the selection changes.
 private struct AnnotationEditor: View {
     let network: BSSObservation
-    @EnvironmentObject var annotations: AnnotationStore
+    // Injected explicitly — the inspector panel does not reliably inherit
+    // environment objects (same gap as sheets; see EmailExportSheetPresenter).
+    @ObservedObject var annotations: AnnotationStore
     @State private var note = ""
 
     var body: some View {
@@ -87,7 +92,7 @@ private struct AnnotationEditor: View {
             HStack {
                 Text("Color").foregroundStyle(.secondary)
                     .frame(width: 130, alignment: .leading)
-                ColorPickerRow(id: network.id, ssid: network.ssid, bssid: network.bssid)
+                ColorPickerRow(annotations: annotations, id: network.id, ssid: network.ssid, bssid: network.bssid)
             }
             .font(.callout)
             VStack(alignment: .leading, spacing: 4) {
