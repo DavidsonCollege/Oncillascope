@@ -44,6 +44,7 @@ let package = Package(
         // Pure version model shared with the CI appcast pipeline; app-target only usage.
         .target(name: "AppUpdateSupport"),
 
+        .testTarget(name: "WiFiModelTests", dependencies: ["WiFiModel"]),
         .testTarget(name: "IEParserTests", dependencies: ["IEParser", "WiFiModel"]),
         .testTarget(name: "WdutilBridgeTests", dependencies: ["WdutilBridge", "WiFiModel"]),
         .testTarget(name: "OUIResolverTests", dependencies: ["OUIResolver", "WiFiModel"]),

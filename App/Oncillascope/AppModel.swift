@@ -54,6 +54,11 @@ final class AppModel: ObservableObject {
     private let telemetry = TelemetryStore(capacity: 3600)
     private let iface = WiFiInterface()
 
+    // Merges scan passes so marginal networks don't flicker in and out of the UI:
+    // a BSS survives 90 s after it was last heard; rows that missed the latest pass
+    // are marked stale (dimmed in the table / channel map).
+    private var aggregator = ScanAggregator()
+
     // Privileged helper daemon. When approved it provides continuous, prompt-free PHY
     // metrics over XPC; otherwise we fall back to a per-session in-process admin prompt.
     private let helper = HelperManager()
@@ -125,6 +130,10 @@ final class AppModel: ObservableObject {
         if helperStatus.isUsable { await refreshWdutil() }
 
         await refreshCurrent()
+
+        // Re-publish from the aggregator so expired entries age out between scans
+        // (and stale-row dimming updates) even when no new scan has landed.
+        publishNetworks()
 
         // Periodic background rescan (radio retune; keep it infrequent).
         if autoScan, Date().timeIntervalSince(lastScanTick) > 20 {
@@ -204,17 +213,36 @@ final class AppModel: ObservableObject {
             }.value
             switch result {
             case .success(let nets):
-                self.networks = nets.sorted { $0.rssi > $1.rssi }
+                self.aggregator.ingest(nets, at: Date())
+                self.publishNetworks()
                 self.scanError = nil
                 self.lastScanDate = Date()
             case .failure(let failure):
-                // Fall back to cached results so the table isn't empty.
-                let cached = await Task.detached { iface.cachedScan() }.value
-                if !cached.isEmpty { self.networks = cached.sorted { $0.rssi > $1.rssi } }
+                // The aggregator already retains recent passes for its ttl, so a
+                // failed scan doesn't empty the table. Seed from the system's scan
+                // cache only when we have nothing at all (e.g. first scan failed).
+                if self.networks.isEmpty {
+                    let cached = await Task.detached { iface.cachedScan() }.value
+                    if !cached.isEmpty { self.aggregator.ingest(cached, at: Date()) }
+                    self.publishNetworks()
+                }
                 self.scanError = failure.message
             }
             self.isScanning = false
         }
+    }
+
+    /// Refresh the published list from the aggregator (also ages out expired entries).
+    private func publishNetworks() {
+        networks = aggregator.observations(at: Date()).sorted { $0.rssi > $1.rssi }
+    }
+
+    /// True when this BSS missed the most recent scan pass and is coasting on its ttl.
+    func isStale(_ id: String) -> Bool { aggregator.isStale(id: id, at: Date()) }
+
+    /// Seconds since this BSS was last heard, for the "last seen" hint.
+    func lastSeenAge(_ id: String) -> TimeInterval? {
+        aggregator.lastSeen(id: id).map { Date().timeIntervalSince($0) }
     }
 
     nonisolated private static func describe(_ e: WiFiInterface.ScanError) -> String {

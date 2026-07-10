@@ -99,9 +99,27 @@ struct NetworksView: View {
         Toggle("Group by SSID", isOn: $groupBySSID).toggleStyle(.checkbox)
     }
 
+    private var filtersActive: Bool {
+        !search.isEmpty || bandFilter != nil || genFilter != nil || minRSSI > -100
+    }
+
+    /// "N of M" count; when filters are hiding networks it says so explicitly and
+    /// offers a one-click reset — a filtered table next to the unfiltered channel
+    /// map otherwise reads as the two views disagreeing.
     private var countLabel: some View {
-        Text("\(filtered.count) of \(model.networks.count)")
-            .font(.caption).foregroundStyle(.secondary)
+        HStack(spacing: 6) {
+            if filtersActive && filtered.count < model.networks.count {
+                Text("\(filtered.count) of \(model.networks.count) — filters active")
+                    .font(.caption).foregroundStyle(.orange)
+                Button("Clear") {
+                    search = ""; bandFilter = nil; genFilter = nil; minRSSI = -100
+                }
+                .buttonStyle(.link).font(.caption)
+            } else {
+                Text("\(filtered.count) of \(model.networks.count)")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
     }
 
     // MARK: - Table
@@ -111,16 +129,23 @@ struct NetworksView: View {
         // inside the SSID cell rather than as standalone columns.
         Table(filtered.sorted(using: sortOrder), selection: $selection, sortOrder: $sortOrder) {
             TableColumn("SSID") { n in
+                let stale = model.isStale(n.id)
                 HStack(spacing: 6) {
                     ColorSwatchMenu(annotations: annotations, id: n.id, ssid: n.ssid, bssid: n.bssid)
                     Text(n.ssid?.isEmpty == false ? n.ssid! : "<hidden>")
                         .foregroundStyle(annotations.color(for: n.id).color ?? .primary)
+                    if stale, let age = model.lastSeenAge(n.id) {
+                        Image(systemName: "clock")
+                            .font(.caption2).foregroundStyle(.secondary)
+                            .help("Not heard in the latest scan — last seen \(Int(age)) s ago. Drops off after 90 s.")
+                    }
                     let note = annotations.annotation(for: n.id).note
                     if !note.isEmpty {
                         Image(systemName: "note.text")
                             .font(.caption2).foregroundStyle(.secondary).help(note)
                     }
                 }
+                .opacity(stale ? 0.5 : 1)
             }
             TableColumn("BSSID") { Text(redact($0.bssid)).font(.system(.body, design: .monospaced)) }
             TableColumn("Vendor") { Text($0.vendor ?? "—") }
@@ -155,9 +180,15 @@ struct NetworksView: View {
                             Text(redact(n.bssid)).font(.system(.body, design: .monospaced))
                             Badge(text: n.channel.label, color: n.channel.band.tint)
                             Badge(text: n.phyGeneration.standardLabel, color: n.phyGeneration.badgeColor)
+                            if model.isStale(n.id), let age = model.lastSeenAge(n.id) {
+                                Image(systemName: "clock")
+                                    .font(.caption2).foregroundStyle(.secondary)
+                                    .help("Not heard in the latest scan — last seen \(Int(age)) s ago.")
+                            }
                             Spacer()
                             Text("\(n.rssi) dBm").foregroundStyle(Quality.rssiColor(n.rssi))
                         }
+                        .opacity(model.isStale(n.id) ? 0.5 : 1)
                         .tag(n.id)
                     }
                 }
